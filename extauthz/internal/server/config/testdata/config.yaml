@@ -1,0 +1,19 @@
+server:
+  api_url: http://localhost:8080
+  store_id: 01FQH7V8BEG3GPQW93KTRFR8JB
+  authorization_model_id: 01GXSA8YR785C4FYS3C0RTG7B1
+
+extraction_sets:
+  - name: test
+    user:
+      type: mock
+      config:
+        value: my_user
+    object:
+      type: mock
+      config:
+        value: my_object
+    relation:
+      type: mock
+      config:
+        value: my_relation

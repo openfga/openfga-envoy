@@ -1,0 +1,18 @@
+server:
+  api_url: http://openfga:18080
+  store_id: 01ARZ3NDEKTSV4RRFFQ69G5FAV
+
+extraction_sets:
+  - name: test
+    user:
+      type: mock
+      config:
+        value: my_user
+    object:
+      type: mock
+      config:
+        value: my_object
+    relation:
+      type: mock
+      config:
+        value: my_relation
