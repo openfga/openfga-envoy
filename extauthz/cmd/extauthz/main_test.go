@@ -8,9 +8,9 @@ import (
 	"testing"
 
 	auth_pb "github.com/envoyproxy/go-control-plane/envoy/service/auth/v3"
-	"github.com/jcchavezs/openfga-envoy/extauthz/internal/extractor"
-	"github.com/jcchavezs/openfga-envoy/extauthz/internal/server/authz"
 	"github.com/openfga/go-sdk/client"
+	"github.com/openfga/openfga-envoy/extauthz/internal/extractor"
+	"github.com/openfga/openfga-envoy/extauthz/internal/server/authz"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

@@ -6,9 +6,9 @@ import (
 	"log"
 
 	envoy "github.com/envoyproxy/go-control-plane/envoy/service/auth/v3"
-	"github.com/jcchavezs/openfga-envoy/extauthz/internal/extractor"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
+	"github.com/openfga/openfga-envoy/extauthz/internal/extractor"
 	"google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

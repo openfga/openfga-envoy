@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jcchavezs/openfga-envoy/extauthz/internal/extractor"
+	"github.com/openfga/openfga-envoy/extauthz/internal/extractor"
 	"gopkg.in/yaml.v3"
 )
 

@@ -7,10 +7,10 @@ import (
 	"net"
 
 	auth_pb "github.com/envoyproxy/go-control-plane/envoy/service/auth/v3"
-	"github.com/jcchavezs/openfga-envoy/extauthz/internal/extractor"
-	"github.com/jcchavezs/openfga-envoy/extauthz/internal/server/authz"
-	"github.com/jcchavezs/openfga-envoy/extauthz/internal/server/config"
 	"github.com/openfga/go-sdk/client"
+	"github.com/openfga/openfga-envoy/extauthz/internal/extractor"
+	"github.com/openfga/openfga-envoy/extauthz/internal/server/authz"
+	"github.com/openfga/openfga-envoy/extauthz/internal/server/config"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"

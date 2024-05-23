@@ -1,3 +1,7 @@
+.PHONY: test
+test:
+	@go test -count=1 ./...
+
 .PHONY: build
 build:
 	@GOOS=linux go build -o build/envoy-extauthz cmd/extauthz/main.go

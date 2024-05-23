@@ -3,7 +3,7 @@ package config
 import (
 	"testing"
 
-	"github.com/jcchavezs/openfga-envoy/extauthz/internal/extractor"
+	"github.com/openfga/openfga-envoy/extauthz/internal/extractor"
 	"github.com/stretchr/testify/require"
 )
 

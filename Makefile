@@ -1,10 +1,10 @@
 .PHONY: run
-run:
+run-extauthz:
 	@go run extauthz/cmd/extauthz/main.go
 
 .PHONY: test
 test:
-	@go test -count=1 ./...
+	@$(MAKE) -C extauthz test
 
 .PHONY: build
 build:
