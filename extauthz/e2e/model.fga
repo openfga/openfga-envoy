@@ -1,0 +1,9 @@
+model
+  schema 1.1
+
+type subject
+
+type resource
+  relations
+   define caller: [subject]
+   define GET: caller

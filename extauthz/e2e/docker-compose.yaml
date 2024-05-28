@@ -1,11 +1,16 @@
+version: '3.2'
+
 services:
   httpbin:
     image: mccutchen/go-httpbin:v2.9.0
     command: [ "/bin/go-httpbin", "-port", "8081" ]
     ports:
       - 8081:8081
+    networks:
+      - app_net
 
   envoy:
+    container_name: envoy
     depends_on:
       - httpbin
       - ext-authz
@@ -26,7 +31,9 @@ services:
     volumes:
       - .:/conf
     ports:
-    - 8080:8080
+      - 8080:8080
+    networks:
+      - app_net
   
   ext-authz:
     build:
@@ -36,11 +43,15 @@ services:
       - 9002
     ports:
     - 9002:9002
-    command: ["--config", "./config.yaml"]
+    command: ["--config", "/etc/extauthz/config.yaml"]
+    volumes:
+      - .:/etc/extauthz
     depends_on:
       openfga:
         condition: service_healthy
-  
+    networks:
+      - app_net
+
   openfga:
     image: openfga/openfga:latest
     container_name: openfga
@@ -57,3 +68,9 @@ services:
       interval: 5s
       timeout: 30s
       retries: 3
+    networks:
+      - app_net
+
+networks:
+  app_net:
+    driver: bridge

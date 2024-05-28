@@ -58,6 +58,7 @@ func (e ExtAuthZFilter) Check(ctx context.Context, req *envoy.CheckRequest) (res
 		return nil, err
 	}
 
+	log.Println(res)
 	return res, nil
 }
 
@@ -113,7 +114,7 @@ func (e ExtAuthZFilter) extract(ctx context.Context, req *envoy.CheckRequest) (*
 func (e ExtAuthZFilter) check(ctx context.Context, req *envoy.CheckRequest) (response *envoy.CheckResponse, err error) {
 	extracted, err := e.extract(ctx, req)
 	if err != nil {
-		return nil, err
+		return deny(codes.PermissionDenied, fmt.Sprintf("Failed to extract: %v", err)), nil
 	}
 
 	if extracted == nil {
@@ -121,9 +122,9 @@ func (e ExtAuthZFilter) check(ctx context.Context, req *envoy.CheckRequest) (res
 	}
 
 	body := client.ClientCheckRequest{
-		User:     extracted.user,
+		User:     fmt.Sprintf("subject:%s", extracted.user),
 		Relation: extracted.relation,
-		Object:   extracted.object,
+		Object:   fmt.Sprintf("resource:%s", extracted.object),
 	}
 
 	options := client.ClientCheckOptions{
@@ -132,7 +133,7 @@ func (e ExtAuthZFilter) check(ctx context.Context, req *envoy.CheckRequest) (res
 
 	data, err := e.client.Check(ctx).Body(body).Options(options).Execute()
 	if err != nil {
-		return nil, err
+		return deny(codes.Internal, fmt.Sprintf("Error checking permissions: %v", err)), nil
 	}
 
 	if data.GetAllowed() {

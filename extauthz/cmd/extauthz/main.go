@@ -32,6 +32,7 @@ func main() {
 	}
 
 	fgaClient, err := client.NewSdkClient(&client.ClientConfiguration{
+		//		Debug:                true,
 		ApiUrl:               cfg.Server.APIURL,
 		StoreId:              cfg.Server.StoreID,
 		AuthorizationModelId: cfg.Server.AuthorizationModelID, // optional, recommended to be set for production

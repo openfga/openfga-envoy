@@ -1,0 +1,3 @@
+- user: subject:test_subject
+  relation: caller
+  object: resource:test_resource
