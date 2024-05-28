@@ -11,5 +11,5 @@ docker: build
 	@docker build -t envoy-extauthz -f Dockerfile .
 
 .PHONY: e2e
-e2e: build
+e2e:
 	@./e2e/run.sh

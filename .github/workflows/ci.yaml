@@ -24,6 +24,9 @@ jobs:
       - name: Test
         run: make test
 
+      - name: Build
+        run: make build
+
       - name: E2E Test
         run: make e2e
 
@@ -33,9 +36,6 @@ jobs:
         with:
           name: extauthz-e2e-logs
           path: extauthz/e2e/logs
-
-      - name: Build
-        run: make build
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
