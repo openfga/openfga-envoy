@@ -31,8 +31,8 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: e2e-logs
-          path: e2e/logs
+          name: extauthz-e2e-logs
+          path: extauthz/e2e/logs
 
       - name: Build
         run: make build
