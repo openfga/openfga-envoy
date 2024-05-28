@@ -10,7 +10,7 @@ TARGET_URL='http://localhost:8080'
 setup_fga_server() {
     $DOCKER_COMPOSE down
     echo "Setting FGA server."
-    mkdir -p logs
+    mkdir -p e2e/logs
     go install github.com/openfga/cli/cmd/fga@latest
     $DOCKER_COMPOSE up -d --build --remove-orphans openfga
 
@@ -24,6 +24,8 @@ setup_fga_server() {
     until [ "`docker inspect -f {{.State.Running}} envoy`"=="true" ]; do
         sleep 0.1;
     done;
+
+    sleep 2
 }
 
 setup_fga_tuples() {
