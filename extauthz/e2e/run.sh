@@ -55,8 +55,10 @@ do_call_and_expect() {
 
 run() {
     setup_fga_server
+    # Before setting the relationships
     do_call_and_expect 403
     setup_fga_tuples
+    # After setting the relationships
     do_call_and_expect 200
     success
 }
