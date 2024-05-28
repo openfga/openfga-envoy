@@ -114,7 +114,7 @@ func (e ExtAuthZFilter) extract(ctx context.Context, req *envoy.CheckRequest) (*
 func (e ExtAuthZFilter) check(ctx context.Context, req *envoy.CheckRequest) (response *envoy.CheckResponse, err error) {
 	extracted, err := e.extract(ctx, req)
 	if err != nil {
-		return deny(codes.PermissionDenied, fmt.Sprintf("Failed to extract: %v", err)), nil
+		return nil, err
 	}
 
 	if extracted == nil {
@@ -122,9 +122,9 @@ func (e ExtAuthZFilter) check(ctx context.Context, req *envoy.CheckRequest) (res
 	}
 
 	body := client.ClientCheckRequest{
-		User:     fmt.Sprintf("subject:%s", extracted.user),
+		User:     extracted.user,
 		Relation: extracted.relation,
-		Object:   fmt.Sprintf("resource:%s", extracted.object),
+		Object:   extracted.object,
 	}
 
 	options := client.ClientCheckOptions{
