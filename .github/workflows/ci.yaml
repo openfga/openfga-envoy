@@ -10,7 +10,7 @@ on:
   pull_request:
 
 jobs:
-  docker:
+  test-and-build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
