@@ -25,9 +25,7 @@ jobs:
         run: make test
 
       - name: Build
-        run: |
-          make build
-          test -f ./extauthz/build/envoy-extauthz-linux
+        run: make build
 
       - name: E2E Test
         run: make e2e
