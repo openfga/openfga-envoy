@@ -4,7 +4,8 @@ test:
 
 .PHONY: build
 build:
-	@GOOS=linux go build -o build/envoy-extauthz cmd/extauthz/main.go
+	@mkdir -p ./build
+	@GOOS=linux go build -o ./build/envoy-extauthz ./cmd/extauthz/main.go
 
 .PHONY: docker
 docker: build
