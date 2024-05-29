@@ -5,7 +5,7 @@ test:
 .PHONY: build
 build:
 	@mkdir -p ./build
-	@GOOS=linux go build -o ./build/envoy-extauthz ./cmd/extauthz/main.go
+	@GOOS=linux CGO_ENABLED=0 go build -o ./build/envoy-extauthz-linux ./cmd/extauthz/main.go
 
 .PHONY: docker
 docker: build
