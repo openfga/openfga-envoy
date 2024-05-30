@@ -1,0 +1,19 @@
+server:
+  api_url: http://openfga:8080
+  # TODO(jcchavezs): This should be read from an env var
+  store_id: ${STORE_ID}
+
+extraction_sets:
+  - name: test
+    user:
+      type: mock
+      config:
+        value: subject:test_subject
+    object:
+      type: mock
+      config:
+        value: resource:test_resource
+    relation:
+      type: mock
+      config:
+        value: GET
