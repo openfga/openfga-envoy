@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: fga
+  labels:
+    app: openfga-extauthz
+spec:
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+    - name: grpc
+      port: 9000
+      targetPort: 9000
+  selector:
+    app: openfga-extauthz
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openfga-extauthz
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openfga-extauthz
+  template:
+    metadata:
+      labels:
+        app: openfga-extauthz
+    spec:
+      containers:
+        - image: openfga-istio-example/openfga-extauthz:0.1
+          imagePullPolicy: Always
+          name: extauthz
+          ports:
+            - containerPort: 8000
+            - containerPort: 9000
+---
+

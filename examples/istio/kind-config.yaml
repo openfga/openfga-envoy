@@ -1,0 +1,27 @@
+# three node cluster with an ingress-ready control-plane node
+# and extra port mappings over 80/443 and 2 workers
+# source: https://kind.sigs.k8s.io/docs/user/ingress/
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+    kubeadmConfigPatches:
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "ingress-ready=true"
+    extraPortMappings:
+      - containerPort: 80
+        hostPort: 80
+        protocol: TCP
+        listenAddress: "0.0.0.0" # Optional, defaults to "0.0.0.0"
+      - containerPort: 8080
+        hostPort: 8080
+        protocol: TCP
+        listenAddress: "0.0.0.0" # Optional, defaults to "0.0.0.0"
+      - containerPort: 443
+        hostPort: 443
+        protocol: TCP
+  - role: worker
+  - role: worker
