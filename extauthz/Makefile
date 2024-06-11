@@ -1,3 +1,5 @@
+DOCKER_IMAGE=gcr.io/openfga/openfga-extauthz
+
 .PHONY: test
 test:
 	@go test -count=1 ./...
@@ -9,7 +11,7 @@ build:
 
 .PHONY: docker
 docker: build
-	@docker build -t envoy-extauthz -f Dockerfile .
+	@docker build -t $(DOCKER_IMAGE):dev -f Dockerfile .
 
 .PHONY: e2e
 e2e:
