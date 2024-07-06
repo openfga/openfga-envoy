@@ -51,12 +51,12 @@ jobs:
           context: extauthz
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
-          tags: openfga/openfga-envoy:${{ github.event.inputs.branch }}
+          tags: openfga/openfga-envoy:${{ github.event.inputs.branch || 'dev' }}
 
       - name: Write summary
         if: ${{ github.event_name != 'pull_request' }}
         run: |
           echo "The image is available:" >> $GITHUB_STEP_SUMMARY
           echo "```" >> $GITHUB_STEP_SUMMARY
-          echo "docker pull ghcr.io/openfga/openfga-envoy:${{ github.event.inputs.branch || 'latest' }}@${{ steps.push.outputs.digest }}" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ghcr.io/openfga/openfga-envoy:${{ github.event.inputs.branch }}@${{ steps.push.outputs.digest }}" >> $GITHUB_STEP_SUMMARY
           echo "```" >> $GITHUB_STEP_SUMMARY
