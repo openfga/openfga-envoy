@@ -1,3 +1,5 @@
+#!/bin/bash
+
 ISTIO_VERSION=1.22.0
 ISTIOCTL=$(shell pwd)/istio-$(ISTIO_VERSION)/bin/istioctl
 KIND=kind
@@ -7,9 +9,13 @@ OPENFGA_EXTAUTHZ_VERSION ?= dev
 
 CLUSTER_NAME=openfga-istio-example
 
-.PHONY: install
+.PHONY: download-istioctl
+download-istioctl:
+	@curl -L https://istio.io/downloadIstio | ISTIO_VERSION=$(ISTIO_VERSION) sh -
+
+.PHONY: install-istioctl
 install-istioctl:
-	curl -L https://istio.io/downloadIstio | ISTIO_VERSION=$(ISTIO_VERSION) sh -
+	@test -d istio-$(ISTIO_VERSION) || $(MAKE) download-istioctl
 
 .PHONY: create-cluster
 create-cluster:
@@ -17,31 +23,34 @@ create-cluster:
 	@$(KIND) export kubeconfig --name $(CLUSTER_NAME) --kubeconfig $(KUBECONFIG)
 
 .PHONY: patch-mesh
-patch-mesh: .istio-configmap-data.yaml
-
-.istio-configmap-data.yaml:
+patch-mesh: 
+	@$(KUBECTL) get configmap istio -n istio-system -o jsonpath='{.data.mesh}' \
+		| yq '.extensionProviders | map(select(.name == "openfga-ext-authz-grpc")) | length' \
+		| awk '$$0 == "1" { print "Already patched"; exit 1 }'
 	@$(KUBECTL) get configmap istio -n istio-system -o json > .istio-configmap.json.backup
-	@cat .istio-configmap.json.backup | jq -r '.data.mesh' > .istio-configmap-data.yaml
-	@yq -o=j -I=0 '.extensionProviders += {"name": "openfga-ext-authz-grpc", "envoyExtAuthzGrpc": {"service": "ext-authz.foo.svc.cluster.local", "port": "9000"}}' .istio-configmap-data.yaml > .istio-configmap-data.auth.json
-	@sed 's@"@\\"@g' .istio-configmap-data.auth.json > .istio-configmap-data.auth.jsonc
+	@cat .istio-configmap.json.backup | jq -r '.data.mesh' | yq -o=j > .istio-configmap-data.json
+	@jq -r '.extensionProviders += [{"name": "openfga-ext-authz-grpc", "envoyExtAuthzGrpc": {"service": "ext-authz.foo.svc.cluster.local", "port": "9000"}}]' .istio-configmap-data.json > .istio-configmap-data.auth.json
+	@cat .istio-configmap-data.auth.json | yq -P > .istio-configmap-data.auth.yaml
+	@printf '"' > .istio-configmap-data.auth.oneline.yaml
+	@sed 's/$$/\\n/' .istio-configmap-data.auth.yaml | sed 's/"//g' | tr -d '\n' | head -c -2 >> .istio-configmap-data.auth.oneline.yaml
+	@printf '"' >> .istio-configmap-data.auth.oneline.yaml
 	@$(MAKE) .patch-istio-configmap-data.yaml || ( rm .istio-configmap-data.auth.json*; exit 1)
-	@rm .istio-configmap-data.auth.json*
-	@$(KUBECTL) get configmap istio -n istio-system -o yaml | grep openfga-ext-authz-grpc
+	@rm .istio-configmap*
 	
 .patch-istio-configmap-data.yaml:
-	@test -f .istio-configmap-data.auth.jsonc
-	@$(KUBECTL) patch configmap istio -n istio-system --type json \
-	  -p '[{"op": "replace", "path": "/data/mesh", "value":"$(shell cat .istio-configmap-data.auth.jsonc)"}]'
+	@jq --argjson mesh "$$(cat .istio-configmap-data.auth.oneline.yaml)" '.data.mesh = $$mesh' .istio-configmap.json.backup > .istio-configmap.json.apply
+	@$(KUBECTL) apply -f .istio-configmap.json.apply
 
-.PHONY: deploy
-deploy:
+install-istio:
 	@$(ISTIOCTL) install --set profile=demo -c $(KUBECONFIG) -y
+
+deploy: install-istio
 	@$(KUBECTL) label namespace default istio-injection=enabled
-	@docker image -rm openfga-istio-example/openfga-extauthz:1.0
+	@docker image rm openfga-istio-example/openfga-extauthz:0.1
 	@docker tag gcr.io/openfga/openfga-extauthz:$(OPENFGA_EXTAUTHZ_VERSION) openfga-istio-example/openfga-extauthz:0.1
 	@$(KIND) load docker-image openfga-istio-example/openfga-extauthz:0.1
 	@$(KUBECTL) apply -f ../../istio/deployment.yaml
-	@$(MAKE) patch-mesh
+	@$(MAKE) patch-mesh || true
 	@$(KUBECTL) apply -f ./manifests/service-a.yaml
 
 destroy-cluster:
