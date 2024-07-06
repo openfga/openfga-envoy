@@ -1,3 +1,5 @@
+OPENFGA_EXTAUTHZ_VERSION ?= dev
+
 .PHONY: test
 test:
 	@go test -count=1 ./...
@@ -9,7 +11,7 @@ build:
 
 .PHONY: docker
 docker: build
-	@docker build -t envoy-extauthz -f Dockerfile .
+	@docker build -t gcr.io/openfga/openfga-extauthz:$(OPENFGA_EXTAUTHZ_VERSION) -f Dockerfile .
 
 .PHONY: e2e
 e2e:
