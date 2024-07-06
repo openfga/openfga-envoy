@@ -54,8 +54,9 @@ jobs:
           tags: openfga/openfga-envoy:${{ github.event.inputs.branch }}
 
       - name: Write summary
+        if: ${{ github.event_name != 'pull_request' }}
         run: |
           echo "The image is available:" >> $GITHUB_STEP_SUMMARY
           echo "```" >> $GITHUB_STEP_SUMMARY
-          echo "ghcr.io/openfga/openfga-envoy:${{ github.event.inputs.branch }}@${{ steps.push.outputs.digest }}" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ghcr.io/openfga/openfga-envoy:${{ github.event.inputs.branch || 'latest' }}@${{ steps.push.outputs.digest }}" >> $GITHUB_STEP_SUMMARY
           echo "```" >> $GITHUB_STEP_SUMMARY
