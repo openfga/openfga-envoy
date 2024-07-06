@@ -9,7 +9,7 @@ build:
 
 .PHONY: docker
 docker: build
-	@docker build -t envoy-extauthz -f Dockerfile .
+	@docker build -t envoy-extauthz:dev -f Dockerfile .
 
 .PHONY: e2e
 e2e:
