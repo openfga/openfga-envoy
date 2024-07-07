@@ -1,4 +1,4 @@
-name: CI
+name: Release
 
 on:
   pull_request:
@@ -8,20 +8,17 @@ on:
       - ".github/workflows/release.yaml"
 
   workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Branch to run the workflow on'
-        required: true
-        default: 'main'
 
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.branch }}
+          ref: ${{ github.ref }}
 
       - name: Setup Go
         uses: actions/setup-go@v4
@@ -51,12 +48,12 @@ jobs:
           context: extauthz
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
-          tags: openfga/openfga-envoy:${{ github.event.inputs.branch || 'dev' }}
+          tags: openfga/openfga-envoy:${{ github.ref || 'dev' }}
 
       - name: Write summary
         if: ${{ github.event_name != 'pull_request' }}
         run: |
           echo "The image is available:" >> $GITHUB_STEP_SUMMARY
           echo "```" >> $GITHUB_STEP_SUMMARY
-          echo "docker pull ghcr.io/openfga/openfga-envoy:${{ github.event.inputs.branch }}@${{ steps.push.outputs.digest }}" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ghcr.io/openfga/openfga-envoy:${{ github.ref }}@${{ steps.push.outputs.digest }}" >> $GITHUB_STEP_SUMMARY
           echo "```" >> $GITHUB_STEP_SUMMARY
