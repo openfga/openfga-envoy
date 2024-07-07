@@ -16,10 +16,24 @@ jobs:
       packages: write
     steps:
       - name: Checkout
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/checkout@v4
+
+      - name: Checkout
+        if: ${{ github.event_name != 'pull_request' }}
         uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
 
+      - name: Generate tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "value=dev" >> $GITHUB_OUTPUT
+          else
+            echo "value=${{ github.ref }}" >> $GITHUB_OUTPUT
+          fi
+  
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
@@ -48,12 +62,12 @@ jobs:
           context: extauthz
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
-          tags: openfga/openfga-envoy:${{ github.ref || 'dev' }}
+          tags: openfga/openfga-envoy:${{ steps.tag.outputs.value }}
 
       - name: Write summary
         if: ${{ github.event_name != 'pull_request' }}
         run: |
           echo "The image is available:" >> $GITHUB_STEP_SUMMARY
           echo "```" >> $GITHUB_STEP_SUMMARY
-          echo "docker pull ghcr.io/openfga/openfga-envoy:${{ github.ref }}@${{ steps.push.outputs.digest }}" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ghcr.io/openfga/openfga-envoy:${{ steps.tag.outputs.value }}@${{ steps.push.outputs.digest }}" >> $GITHUB_STEP_SUMMARY
           echo "```" >> $GITHUB_STEP_SUMMARY
