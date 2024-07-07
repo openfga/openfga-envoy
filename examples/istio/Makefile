@@ -46,9 +46,9 @@ install-istio:
 
 deploy: install-istio
 	@$(KUBECTL) label namespace default istio-injection=enabled
-	@docker image rm openfga-istio-example/openfga-extauthz:0.1
+	@docker image rm openfga-istio-example/openfga-extauthz:0.1 || true
 	@docker tag gcr.io/openfga/openfga-extauthz:$(OPENFGA_EXTAUTHZ_VERSION) openfga-istio-example/openfga-extauthz:0.1
-	@$(KIND) load docker-image openfga-istio-example/openfga-extauthz:0.1
+	@$(KIND) load docker-image --name $(CLUSTER_NAME) openfga-istio-example/openfga-extauthz:0.1
 	@$(KUBECTL) apply -f ../../istio/deployment.yaml
 	@$(MAKE) patch-mesh || true
 	@$(KUBECTL) apply -f ./manifests/service-a.yaml
