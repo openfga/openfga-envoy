@@ -32,7 +32,8 @@ jobs:
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             echo "value=dev" >> $GITHUB_OUTPUT
           else
-            echo "value=${{ github.ref }}" >> $GITHUB_OUTPUT
+            name=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
+            echo "value=$name" >> $GITHUB_OUTPUT
           fi
   
       - name: Setup Go
