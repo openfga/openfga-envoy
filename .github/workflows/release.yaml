@@ -11,10 +11,6 @@ on:
 
 jobs:
   build-and-release:
-    strategy:
-      matrix:
-        os: [linux]
-        arch: [amd64, arm64]
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -36,9 +32,6 @@ jobs:
           go-version: 1.22.1
 
       - name: Build
-        env:
-          BUILD_OS: ${{ matrix.os }}
-          BUILD_ARCH: ${{ matrix.arch }}
         run: make build
 
       - name: Set up QEMU
@@ -71,7 +64,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: extauthz
-          platforms: ${{ matrix.os }}/${{ matrix.arch }}
+          platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -82,4 +75,11 @@ jobs:
         if: ${{ github.event_name != 'pull_request' }}
         run: |
           echo "The image is available:" >> $GITHUB_STEP_SUMMARY
-          echo "<pre>docker pull --platform=${{ matrix.os }}/${{ matrix.arch }} ${{ steps.meta.outputs.tags }}@${{ steps.push.outputs.digest }}</pre>" >> $GITHUB_STEP_SUMMARY
+          echo "<strong>linux/amd64</strong>"  >> $GITHUB_STEP_SUMMARY
+          echo "<pre>" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull --platform=linux/amd64 ${{ steps.meta.outputs.tags }}@${{ steps.push.outputs.digest }}" >> $GITHUB_STEP_SUMMARY
+          echo "</pre>" >> $GITHUB_STEP_SUMMARY
+          echo "<strong>linux/arm64</strong>"  >> $GITHUB_STEP_SUMMARY
+          echo "<pre>" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull --platform=linux/arm64 ${{ steps.meta.outputs.tags }}@${{ steps.push.outputs.digest }}" >> $GITHUB_STEP_SUMMARY
+          echo "</pre>" >> $GITHUB_STEP_SUMMARY

@@ -10,6 +10,13 @@ test:
 .PHONY: build
 build:
 	@mkdir -p ./build
+	make build-platform BUILD_OS="linux" BUILD_ARCH="amd64"
+	make build-platform BUILD_OS="linux" BUILD_ARCH="arm64"
+	make build-platform BUILD_OS="darwin" BUILD_ARCH="amd64"
+	make build-platform BUILD_OS="darwin" BUILD_ARCH="arm64"
+
+build-platform:
+	@mkdir -p ./build
 	@GOOS=$(BUILD_OS) GOARCH=$(BUILD_ARCH) CGO_ENABLED=0 go build -o ./build/envoy-extauthz-$(BUILD_OS)-$(BUILD_ARCH) ./cmd/extauthz/main.go
 
 .PHONY: docker

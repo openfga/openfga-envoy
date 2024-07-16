@@ -11,10 +11,6 @@ on:
 
 jobs:
   test-and-build:
-    strategy:
-      matrix:
-        os: [linux]
-        arch: [amd64, arm64]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -29,9 +25,6 @@ jobs:
         run: make test
 
       - name: Build
-        env:
-          BUILD_OS: ${{ matrix.os }}
-          BUILD_ARCH: ${{ matrix.arch }}
         run: make build
 
       - name: E2E Test
@@ -61,6 +54,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: extauthz
-          platforms: ${{ matrix.os }}/${{ matrix.arch }}
+          platforms: linux/amd64,linux/arm64
           push: false
           tags: openfga/openfga-envoy:dev
