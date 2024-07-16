@@ -1,6 +1,10 @@
 FROM scratch
 
-COPY build/envoy-extauthz-linux /envoy-extauthz
+ARG TARGETOS
+ARG TARGETARCH
+ARG TARGETVARIANT
+
+COPY build/envoy-extauthz-${TARGETOS}-${TARGETARCH}${TARGETVARIANT} /envoy-extauthz
 
 EXPOSE 9002
 

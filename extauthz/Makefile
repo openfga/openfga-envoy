@@ -1,4 +1,7 @@
-OPENFGA_EXTAUTHZ_VERSION ?= dev
+PACKAGE_VERSION ?= dev
+BUILD_OS ?= $(shell go env GOOS)
+BUILD_ARCH ?= $(shell go env GOARCH)
+DOCKER_PLATFORM = $(BUILD_OS)/$(BUILD_ARCH)
 
 .PHONY: test
 test:
@@ -7,11 +10,18 @@ test:
 .PHONY: build
 build:
 	@mkdir -p ./build
-	@GOOS=linux CGO_ENABLED=0 go build -o ./build/envoy-extauthz-linux ./cmd/extauthz/main.go
+	make build-platform BUILD_OS="linux" BUILD_ARCH="amd64"
+	make build-platform BUILD_OS="linux" BUILD_ARCH="arm64"
+	make build-platform BUILD_OS="darwin" BUILD_ARCH="amd64"
+	make build-platform BUILD_OS="darwin" BUILD_ARCH="arm64"
+
+build-platform:
+	@mkdir -p ./build
+	@GOOS=$(BUILD_OS) GOARCH=$(BUILD_ARCH) CGO_ENABLED=0 go build -o ./build/envoy-extauthz-$(BUILD_OS)-$(BUILD_ARCH) ./cmd/extauthz/main.go
 
 .PHONY: docker
 docker: build
-	@docker build -t gcr.io/openfga/openfga-extauthz:$(OPENFGA_EXTAUTHZ_VERSION) -f Dockerfile .
+	@docker build --platform=$(DOCKER_PLATFORM) -t gcr.io/openfga/openfga-extauthz:$(PACKAGE_VERSION) -f Dockerfile .
 
 .PHONY: e2e
 e2e:
