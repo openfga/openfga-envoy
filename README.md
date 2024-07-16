@@ -1,4 +1,4 @@
-# OpenFGA Envoy
+# OpenFGA Envoy - WIP
 
 This repository contains the integration to enforce access control with OpenFGA on Envoy.
 
