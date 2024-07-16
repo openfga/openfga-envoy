@@ -75,6 +75,4 @@ jobs:
         if: ${{ github.event_name != 'pull_request' }}
         run: |
           echo "The image is available:" >> $GITHUB_STEP_SUMMARY
-          echo "```" >> $GITHUB_STEP_SUMMARY
-          echo "docker pull ${{ steps.meta.outputs.tags }}@${{ steps.push.outputs.digest }}" >> $GITHUB_STEP_SUMMARY
-          echo "```" >> $GITHUB_STEP_SUMMARY
+          echo "<code>docker pull ${{ steps.meta.outputs.tags }}@${{ steps.push.outputs.digest }}</code>" >> $GITHUB_STEP_SUMMARY
