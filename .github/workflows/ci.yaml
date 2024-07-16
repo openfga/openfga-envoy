@@ -11,6 +11,10 @@ on:
 
 jobs:
   test-and-build:
+    strategy:
+      matrix:
+        os: [linux]
+        arch: [amd64, arm64]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -28,6 +32,9 @@ jobs:
         run: make build
 
       - name: E2E Test
+        env:
+          BUILD_OS: ${{ matrix.os }}
+          BUILD_ARCH: ${{ matrix.arch }}
         run: make e2e
 
       - name: Uploads logs if failure
@@ -54,6 +61,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: extauthz
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ matrix.os }}/${{ matrix.arch }}
           push: false
           tags: openfga/openfga-envoy:dev
