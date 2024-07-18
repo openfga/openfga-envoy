@@ -1,6 +1,6 @@
 BUILD_OS ?= $(shell go env GOOS)
 BUILD_ARCH ?= $(shell go env GOARCH)
-DOCKER_IMAGE = gcr.io/openfga/openfga-extauthz
+DOCKER_IMAGE = ghcr.io/openfga/openfga-extauthz
 DOCKER_VERSION ?= dev
 DOCKER_PLATFORM = $(BUILD_OS)/$(BUILD_ARCH)
 
@@ -10,11 +10,10 @@ test:
 
 .PHONY: build
 build:
-	@mkdir -p ./build
-	make build-platform BUILD_OS="linux" BUILD_ARCH="amd64"
-	make build-platform BUILD_OS="linux" BUILD_ARCH="arm64"
-	make build-platform BUILD_OS="darwin" BUILD_ARCH="amd64"
-	make build-platform BUILD_OS="darwin" BUILD_ARCH="arm64"
+	@make build-platform BUILD_OS="linux" BUILD_ARCH="amd64"
+	@make build-platform BUILD_OS="linux" BUILD_ARCH="arm64"
+	@make build-platform BUILD_OS="darwin" BUILD_ARCH="amd64"
+	@make build-platform BUILD_OS="darwin" BUILD_ARCH="arm64"
 
 build-platform:
 	@mkdir -p ./build
