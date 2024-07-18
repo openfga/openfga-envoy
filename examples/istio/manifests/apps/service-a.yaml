@@ -1,35 +1,37 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: httpbin
+  name: app-a
+  namespace: apps
   labels:
-    app: httpbin
+    app: app-a
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: httpbin
+      app: app-a
   template:
     metadata:
       labels:
-        app: httpbin
+        app: app-a
     spec:
       containers:
-        - name: httpbin
-          image: mccutchen/go-httpbin
+        - name: httpmole
+          image: ghcr.io/jcchavezs/httpmole:0.0.1
+          imagePullPolicy: IfNotPresent
           ports:
             - name: web
-              containerPort: 8080
+              containerPort: 10080
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: httpbin
-  namespace: ${APP_NAMESPACE}
+  name: app-a
+  namespace: apps
 spec:
   ports:
     - name: web
-      port: 8080
+      port: 10080
       targetPort: web
   selector:
-    app: httpbin
+    app: app-a

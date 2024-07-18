@@ -1,8 +1,9 @@
 PACKAGE_VERSION ?= dev
 BUILD_OS ?= $(shell go env GOOS)
 BUILD_ARCH ?= $(shell go env GOARCH)
+DOCKER_IMAGE = ghcr.io/openfga/openfga-extauthz
+DOCKER_VERSION ?= dev
 DOCKER_PLATFORM = $(BUILD_OS)/$(BUILD_ARCH)
-DOCKER_IMAGE=gcr.io/openfga/openfga-extauthz
 
 .PHONY: test
 test:

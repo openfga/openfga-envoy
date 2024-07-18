@@ -1,22 +1,24 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: app-a
+  name: app-b
+  namespace: apps
   labels:
-    app: app-a
+    app: app-b
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: app-a
+      app: app-b
   template:
     metadata:
       labels:
-        app: app-a
+        app: app-b
     spec:
       containers:
-        - name: httpmole
-          image: gcr.io/jcchavezs/httpmole:main
+        - name: app-b
+          image: ghcr.io/jcchavezs/httpmole:0.0.1
+          imagePullPolicy: IfNotPresent
           ports:
             - name: web
               containerPort: 10080
@@ -24,11 +26,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: httpbin
+  name: app-b
+  namespace: apps
 spec:
   ports:
     - name: web
       port: 10080
       targetPort: web
   selector:
-    app: app-a
+    app: app-b

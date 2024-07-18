@@ -7,5 +7,5 @@ spec:
   provider:
     # The provider name must match the extension provider defined in the mesh config.
     # You can also replace this with openfga-ext-authz-http to test the other external authorizer definition.
-    name: openfga-ext-authz-grpc
-  rules: {}
+    name: openfga-extauthz-grpc
+  rules: [{}]

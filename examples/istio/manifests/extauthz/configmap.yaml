@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: exthauthz-config
+data:
+  config.yaml: |
+    server:
+      api_url: http://extauthz.openfga.svc.cluster.local:8080
+      store_id: ${STORE_ID}
+    extraction_sets:
+    - name: test
+      user:
+        type: mock
+        config:
+          value: subject:test_subject
+      object:
+        type: mock
+        config:
+          value: resource:test_resource
+      relation:
+        type: mock
+        config:
+          value: GET
