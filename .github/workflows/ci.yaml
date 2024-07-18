@@ -55,6 +55,5 @@ jobs:
         with:
           context: extauthz
           platforms: linux/amd64,linux/arm64
-          #push: ${{ github.event_name != 'pull_request' }}
           push: false
-          tags: openfga/openfga-envoy:latest
+          tags: openfga/openfga-envoy:dev

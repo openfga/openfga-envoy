@@ -38,6 +38,9 @@ services:
   ext-authz:
     build:
       context: ..
+      platforms:
+        - "linux/amd64"
+        - "linux/arm64"
       dockerfile: Dockerfile
     expose:
       - 9002
