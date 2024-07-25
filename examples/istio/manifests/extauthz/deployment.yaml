@@ -35,7 +35,7 @@ spec:
         - image: ghcr.io/openfga/openfga-extauthz:0.0.1
           command:
             - "/envoy-extauthz"
-            - "--config-path"
+            - "--config"
             - "/etc/extauthz/config.yaml"
           imagePullPolicy: IfNotPresent
           name: extauthz

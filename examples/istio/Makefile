@@ -53,8 +53,6 @@ patch-envoy-extauthz:
 
 install-istio:
 	@$(ISTIOCTL) install --set profile=demo -c $(KUBECONFIG) -y
-# follows https://medium.com/@s4l1h/how-to-install-kind-and-istio-ingress-controller-3b510834c762
-	@$(KUBECTL) patch deployments.apps -o yaml -n istio-system istio-ingressgateway -p '{"spec":{"template":{"spec":{"containers":[{"name":"istio-proxy","ports":[{"containerPort":8080,"hostPort":80},{"containerPort":8443,"hostPort":443}]}]}}}}'
 
 deploy: install-istio
 	@$(MAKE) -C ../../extauthz docker BUILD_OS=linux BUILD_ARCH=$(BUILD_ARCH) DOCKER_VERSION=example-istio
@@ -62,8 +60,8 @@ deploy: install-istio
 	@$(KIND) load docker-image --name $(CLUSTER_NAME) ghcr.io/openfga/openfga-extauthz:0.0.1
 	
 	@docker rmi ghcr.io/jcchavezs/httpmole:0.0.1 > /dev/null || true
-	@docker pull --platform=linux/$(BUILD_ARCH) ghcr.io/jcchavezs/httpmole:main
-	@docker tag ghcr.io/jcchavezs/httpmole:main ghcr.io/jcchavezs/httpmole:0.0.1
+	@docker pull --platform=linux/$(BUILD_ARCH) ghcr.io/jcchavezs/httpmole:0.2.0
+	@docker tag ghcr.io/jcchavezs/httpmole:0.2.0 ghcr.io/jcchavezs/httpmole:0.0.1
 	@$(KIND) load docker-image --name $(CLUSTER_NAME) ghcr.io/jcchavezs/httpmole:0.0.1
 
 	@$(KUBECTL) apply -f ./manifests/apps
@@ -78,6 +76,6 @@ destroy-cluster:
 	@$(KIND) delete cluster --name $(CLUSTER_NAME)
 
 kubeconfig:
-	@echo "ACTION REQUIRED: Paste from clipboard in your terminal and hit 'return/enter'"
+	@echo "\nACTION REQUIRED: Paste from clipboard in your terminal and hit 'return/enter'\n"
 	@echo "export KUBECONFIG=\"$(KUBECONFIG)\"" | pbcopy
 	
