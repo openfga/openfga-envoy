@@ -26,3 +26,7 @@ docker: build
 .PHONY: e2e
 e2e:
 	@./e2e/run.sh
+
+.PHONY: e2e-tools
+e2e-tools:
+	@which yq > /dev/null || go install github.com/mikefarah/yq/v4@latest

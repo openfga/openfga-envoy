@@ -1,11 +1,24 @@
 #!/bin/bash
 
-DOCKER_COMPOSE="docker compose -f e2e/docker-compose.yaml"
+set -e
+
+DOCKER_COMPOSE='docker compose -f e2e/docker-compose.yaml'
+YQ='yq'
 
 STORE_ID=''
+STORE_FILE='e2e/store.fga.yaml'
 
 FGA_API_URL='http://localhost:18080'
 TARGET_URL='http://localhost:8080'
+
+which yq || (echo "yq is not installed. Please install it." && exit 1)
+
+TMPDIR=$(mktemp -d)
+MODEL=$TMPDIR/model.fga
+$YQ '.model' $STORE_FILE > $MODEL
+
+TUPLES=$TMPDIR/tuples.yaml
+$YQ '.tuples' $STORE_FILE > $TUPLES
 
 setup_fga_server() {
     $DOCKER_COMPOSE down
@@ -14,7 +27,7 @@ setup_fga_server() {
     go install github.com/openfga/cli/cmd/fga@latest
     $DOCKER_COMPOSE up -d --build --remove-orphans openfga
 
-    STORE_ID=$(fga store create --model e2e/model.fga --api-url $FGA_API_URL | jq -rc '.store.id')
+    STORE_ID=$(fga store create --model $MODEL --api-url $FGA_API_URL | jq -rc '.store.id')
     echo "Created store with ID $STORE_ID"
 
     # TODO(jcchavezs): adds support for environment variable config to avoid this step
@@ -30,18 +43,24 @@ setup_fga_server() {
 
 setup_fga_tuples() {
     echo "Writing FGA tuples."
-    fga tuple write --store-id=$STORE_ID --file e2e/tuples.yaml --api-url $FGA_API_URL | jq -er '.successful[0].object?' > /dev/null
+    fga tuple write --store-id=$STORE_ID --file $TUPLES --api-url $FGA_API_URL | jq -er '.successful[0].object?' > /dev/null
 }
 
 failure () {
+    cp $MODEL e2e/logs/model.fga
+    cp $TUPLES e2e/logs/tuples.yaml
     $DOCKER_COMPOSE logs ext-authz > e2e/logs/ext-authz.log
     $DOCKER_COMPOSE logs envoy > e2e/logs/envoy.log
     $DOCKER_COMPOSE logs openfga > e2e/logs/openfga.log
     $DOCKER_COMPOSE down
+    rm $MODEL
+    rm $TUPLES
 }
 
 success() {
     $DOCKER_COMPOSE down
+    rm $MODEL
+    rm $TUPLES
 }
 
 do_call_and_expect() {
@@ -55,7 +74,12 @@ do_call_and_expect() {
     fi
 }
 
+test_store() {
+    fga model test --tests $STORE_FILE
+}
+
 run() {
+    test_store
     setup_fga_server
     # Before setting the relationships
     do_call_and_expect 403
