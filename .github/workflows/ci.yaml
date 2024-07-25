@@ -28,7 +28,7 @@ jobs:
         run: make build
 
       - name: E2E Test
-        run: make e2e-tools e2e
+        run: make e2e
 
       - name: Uploads logs if failure
         if: failure()
