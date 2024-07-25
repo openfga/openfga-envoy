@@ -11,7 +11,8 @@ STORE_FILE='e2e/store.fga.yaml'
 FGA_API_URL='http://localhost:18080'
 TARGET_URL='http://localhost:8080'
 
-which yq || (echo "yq is not installed. Please install it." && exit 1)
+which yq || (echo "yq is not installed. Please install it using make e2e-tools." && exit 1)
+which fga || (echo "fga is not installed. Please install it make e2e-tools." && exit 1)
 
 TMPDIR=$(mktemp -d)
 MODEL=$TMPDIR/model.fga
@@ -24,7 +25,6 @@ setup_fga_server() {
     $DOCKER_COMPOSE down
     echo "Setting FGA server."
     mkdir -p e2e/logs
-    go install github.com/openfga/cli/cmd/fga@latest
     $DOCKER_COMPOSE up -d --build --remove-orphans openfga
 
     STORE_ID=$(fga store create --model $MODEL --api-url $FGA_API_URL | jq -rc '.store.id')

@@ -29,4 +29,4 @@ e2e: e2e-tools
 
 e2e-tools:
 	@which yq > /dev/null || go install github.com/mikefarah/yq/v4@latest
-	@which fga > /dev/null || go install github.com/openfga/openfga/cmd/openfga@latest
+	@which fga > /dev/null || go install github.com/openfga/cli/cmd/fga@latest
