@@ -31,7 +31,7 @@ metadata:
 spec:
   ports:
     - name: web
-      port: 10080
+      port: 80
       targetPort: web
   selector:
     app: app-a
