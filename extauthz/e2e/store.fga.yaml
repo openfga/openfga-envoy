@@ -1,0 +1,23 @@
+model: |
+  model
+    schema 1.1
+
+  type subject
+
+  type resource
+    relations
+    define caller: [subject]
+    define GET: caller
+
+tuples:
+  - user: subject:test_subject
+    relation: caller
+    object: resource:test_resource
+
+tests:
+  - name: subject can GET the caller
+    check:
+      - user: subject:test_subject
+        object: resource:test_resource
+        assertions:
+          GET: true

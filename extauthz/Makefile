@@ -24,5 +24,9 @@ docker: build
 	@docker build --platform=$(DOCKER_PLATFORM) -t gcr.io/openfga/openfga-extauthz:$(PACKAGE_VERSION) -f Dockerfile .
 
 .PHONY: e2e
-e2e:
+e2e: e2e-tools
 	@./e2e/run.sh
+
+e2e-tools:
+	@which yq > /dev/null || go install github.com/mikefarah/yq/v4@latest
+	@which fga > /dev/null || go install github.com/openfga/openfga/cmd/openfga@latest
