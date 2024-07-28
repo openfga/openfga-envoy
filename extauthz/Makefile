@@ -1,6 +1,7 @@
-PACKAGE_VERSION ?= dev
 BUILD_OS ?= $(shell go env GOOS)
 BUILD_ARCH ?= $(shell go env GOARCH)
+DOCKER_IMAGE = ghcr.io/openfga/openfga-extauthz
+DOCKER_VERSION ?= dev
 DOCKER_PLATFORM = $(BUILD_OS)/$(BUILD_ARCH)
 
 .PHONY: test
@@ -9,11 +10,10 @@ test:
 
 .PHONY: build
 build:
-	@mkdir -p ./build
-	make build-platform BUILD_OS="linux" BUILD_ARCH="amd64"
-	make build-platform BUILD_OS="linux" BUILD_ARCH="arm64"
-	make build-platform BUILD_OS="darwin" BUILD_ARCH="amd64"
-	make build-platform BUILD_OS="darwin" BUILD_ARCH="arm64"
+	@make build-platform BUILD_OS="linux" BUILD_ARCH="amd64"
+	@make build-platform BUILD_OS="linux" BUILD_ARCH="arm64"
+	@make build-platform BUILD_OS="darwin" BUILD_ARCH="amd64"
+	@make build-platform BUILD_OS="darwin" BUILD_ARCH="arm64"
 
 build-platform:
 	@mkdir -p ./build
@@ -21,7 +21,7 @@ build-platform:
 
 .PHONY: docker
 docker: build
-	@docker build --platform=$(DOCKER_PLATFORM) -t gcr.io/openfga/openfga-extauthz:$(PACKAGE_VERSION) -f Dockerfile .
+	@docker build --platform=$(DOCKER_PLATFORM) -t $(DOCKER_IMAGE):$(DOCKER_VERSION) -f Dockerfile .
 
 .PHONY: e2e
 e2e: e2e-tools
