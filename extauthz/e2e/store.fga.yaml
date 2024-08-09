@@ -6,18 +6,54 @@ model: |
 
   type resource
     relations
-    define caller: [subject]
-    define GET: caller
+      define can_call: [ subject with allowed_methods ]
+
+  condition allowed_methods(allowed: list<string>, method: string) {
+    allowed.exists_one(r, r == method) || allowed.exists_one(r, r == "*")
+  }
 
 tuples:
-  - user: subject:test_subject
-    relation: caller
-    object: resource:test_resource
+  - user: subject:user_123
+    relation: can_call
+    object: resource:service_abc
+    condition:
+      name: allowed_methods
+      context:
+        allowed: ["GET"]
+  - user: subject:user_456
+    relation: can_call
+    object: resource:service_xyz
+    condition:
+      name: allowed_methods
+      context:
+        allowed: ["*"]
 
 tests:
-  - name: subject can GET the caller
+  - name: user_123 can do only GET to service_abc
     check:
-      - user: subject:test_subject
-        object: resource:test_resource
+      - user: subject:user_123
         assertions:
-          GET: true
+          can_call: true
+        object: resource:service_abc
+        context:
+          method: "GET"
+      - user: subject:user_123
+        assertions:
+          can_call: false
+        object: resource:service_abc
+        context:
+          method: "POST"
+  - name: user_456 can do only GET to service_xyz
+    check:
+      - user: subject:user_456
+        assertions:
+          can_call: true
+        object: resource:service_xyz
+        context:
+          method: "GET"
+      - user: subject:user_456
+        assertions:
+          can_call: true
+        object: resource:service_xyz
+        context:
+          method: "POST"

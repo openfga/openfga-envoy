@@ -65,8 +65,8 @@ func TestNoUserExtractedFails(t *testing.T) {
 
 	e := extractor.ExtractorSet{
 		Name: "extauthz",
-		User: func(ctx context.Context, value *auth_pb.CheckRequest) (string, bool, error) {
-			return "", false, expectedErr
+		User: func(ctx context.Context, value *auth_pb.CheckRequest) (extractor.Extraction, bool, error) {
+			return extractor.Extraction{}, false, expectedErr
 		},
 	}
 

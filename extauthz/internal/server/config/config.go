@@ -36,8 +36,10 @@ func (e *Extractor) UnmarshalYAML(value *yaml.Node) error {
 		return fmt.Errorf("getting %s: %w", e.Type, err)
 	}
 
-	if err := rawConfig.Config.Decode(e.Config); err != nil {
-		return err
+	if e.Config != nil {
+		if err := rawConfig.Config.Decode(e.Config); err != nil {
+			return err
+		}
 	}
 
 	return nil
