@@ -63,13 +63,13 @@ func (e ExtAuthZFilter) Check(ctx context.Context, req *envoy.CheckRequest) (res
 }
 
 type extracted struct {
-	user     string
-	object   string
-	relation string
+	user     extractor.Extraction
+	object   extractor.Extraction
+	relation extractor.Extraction
 }
 
 func (e ExtAuthZFilter) extract(ctx context.Context, req *envoy.CheckRequest) (*extracted, error) {
-	var user, object, relation string
+	var user, object, relation extractor.Extraction
 	for _, es := range e.extractionSet {
 		var (
 			found bool
@@ -110,6 +110,22 @@ func (e ExtAuthZFilter) extract(ctx context.Context, req *envoy.CheckRequest) (*
 	return nil, nil
 }
 
+func mergeMaps(map1, map2 map[string]any) map[string]any {
+	UniqueMap := make(map[string]any)
+
+	// for loop for the first map
+	for key, val := range map1 {
+		UniqueMap[key] = val
+	}
+
+	// for loop for the second map
+	for key, val := range map2 {
+		UniqueMap[key] = val
+	}
+	// return merged result
+	return UniqueMap
+}
+
 // Check implements the Check method of the Authorization interface.
 func (e ExtAuthZFilter) check(ctx context.Context, req *envoy.CheckRequest) (response *envoy.CheckResponse, err error) {
 	extracted, err := e.extract(ctx, req)
@@ -121,10 +137,25 @@ func (e ExtAuthZFilter) check(ctx context.Context, req *envoy.CheckRequest) (res
 		return deny(codes.InvalidArgument, "No extraction set found"), nil
 	}
 
+	context := map[string]any{}
+
+	if extracted.user.Context != nil {
+		context = mergeMaps(context, extracted.user.Context)
+	}
+
+	if extracted.object.Context != nil {
+		context = mergeMaps(context, extracted.object.Context)
+	}
+
+	if extracted.relation.Context != nil {
+		context = mergeMaps(context, extracted.relation.Context)
+	}
+
 	body := client.ClientCheckRequest{
-		User:     extracted.user,
-		Relation: extracted.relation,
-		Object:   extracted.object,
+		User:     extracted.user.Value,
+		Relation: extracted.relation.Value,
+		Object:   extracted.object.Value,
+		Context:  &context,
 	}
 
 	options := client.ClientCheckOptions{
