@@ -41,10 +41,10 @@ func main() {
 		log.Fatalf("failed to initialize OpenFGA client: %v", err)
 	}
 
-	extractionSet := make([]extractor.ExtractorSet, 0, len(cfg.ExtractionSet))
+	extractionSet := make([]extractor.ExtractorKit, 0, len(cfg.ExtractionSet))
 	for _, es := range cfg.ExtractionSet {
 		var (
-			eSet extractor.ExtractorSet
+			eSet extractor.ExtractorKit
 			err  error
 		)
 

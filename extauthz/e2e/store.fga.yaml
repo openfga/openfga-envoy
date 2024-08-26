@@ -6,7 +6,7 @@ model: |
 
   type resource
     relations
-      define can_call: [ subject with allowed_methods ]
+      define access: [ subject with allowed_methods ]
 
   condition allowed_methods(allowed: list<string>, method: string) {
     allowed.exists_one(r, r == method) || allowed.exists_one(r, r == "*")
@@ -14,14 +14,14 @@ model: |
 
 tuples:
   - user: subject:user_123
-    relation: can_call
+    relation: access
     object: resource:service_abc
     condition:
       name: allowed_methods
       context:
         allowed: ["GET"]
   - user: subject:user_456
-    relation: can_call
+    relation: access
     object: resource:service_xyz
     condition:
       name: allowed_methods
@@ -33,13 +33,13 @@ tests:
     check:
       - user: subject:user_123
         assertions:
-          can_call: true
+          access: true
         object: resource:service_abc
         context:
           method: "GET"
       - user: subject:user_123
         assertions:
-          can_call: false
+          access: false
         object: resource:service_abc
         context:
           method: "POST"
@@ -47,13 +47,13 @@ tests:
     check:
       - user: subject:user_456
         assertions:
-          can_call: true
+          access: true
         object: resource:service_xyz
         context:
           method: "GET"
       - user: subject:user_456
         assertions:
-          can_call: true
+          access: true
         object: resource:service_xyz
         context:
           method: "POST"
