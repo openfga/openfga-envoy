@@ -8,8 +8,8 @@ model: |
     relations
       define access: [ subject with allowed_methods ]
 
-  condition allowed_methods(allowed: list<string>, method: string) {
-    allowed.exists_one(r, r == method) || allowed.exists_one(r, r == "*")
+  condition allowed_methods(allowed: list<string>, request_method: string) {
+    allowed.exists_one(r, r == request_method) || allowed.exists_one(r, r == "*")
   }
 
 tuples:
@@ -36,13 +36,13 @@ tests:
           access: true
         object: resource:service_abc
         context:
-          method: "GET"
+          request_method: "GET"
       - user: subject:user_123
         assertions:
           access: false
         object: resource:service_abc
         context:
-          method: "POST"
+          request_method: "POST"
   - name: user_456 can do only GET to service_xyz
     check:
       - user: subject:user_456
@@ -50,10 +50,10 @@ tests:
           access: true
         object: resource:service_xyz
         context:
-          method: "GET"
+          request_method: "GET"
       - user: subject:user_456
         assertions:
           access: true
         object: resource:service_xyz
         context:
-          method: "POST"
+          request_method: "POST"

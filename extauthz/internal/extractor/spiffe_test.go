@@ -51,9 +51,7 @@ func TestSpiffeExtractor(t *testing.T) {
 
 		require.NoError(t, err)
 		require.True(t, found)
-		c := &Check{}
-		require.NoError(t, extraction(c))
-		require.Equal(t, "spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account", c.User)
+		require.Equal(t, "spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account", extraction.Value)
 	})
 
 	t.Run("success for object", func(t *testing.T) {
@@ -75,8 +73,6 @@ func TestSpiffeExtractor(t *testing.T) {
 
 		require.NoError(t, err)
 		require.True(t, found)
-		c := &Check{}
-		require.NoError(t, extraction(c))
-		require.Equal(t, "spiffe://cluster.local/ns/default/sa/httpbin", c.Object)
+		require.Equal(t, "spiffe://cluster.local/ns/default/sa/httpbin", extraction.Value)
 	})
 }

@@ -8,12 +8,12 @@ extraction_sets:
     user:
       type: mock
       config:
-        user: my_user
+        value: subject:my_user
     object:
       type: mock
       config:
-        object: my_object
+        value: resource:my_object
     relation:
       type: mock
       config:
-        relation: my_relation
+        value: my_relation

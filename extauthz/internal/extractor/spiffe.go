@@ -59,34 +59,19 @@ func NewSpiffe(config *SpiffeConfig) Extractor {
 		config = &SpiffeConfig{}
 	}
 
-	var (
-		prefix            string
-		identityExtractor func(identity string) Extraction
-	)
+	var prefix string
 
 	if config._type == spiffeTypeUser {
 		prefix = spiffeCurrentClientKey
-		identityExtractor = func(identity string) Extraction {
-			return func(c *Check) error {
-				c.User = identity
-				return nil
-			}
-		}
 	} else {
 		prefix = spiffeKey
-		identityExtractor = func(identity string) Extraction {
-			return func(c *Check) error {
-				c.Object = identity
-				return nil
-			}
-		}
 	}
 
 	return func(ctx context.Context, value *authv3.CheckRequest) (Extraction, bool, error) {
 		headers := value.GetAttributes().GetRequest().GetHttp().GetHeaders()
 		val, ok := headers[clientCertHeader]
 		if !ok {
-			return nil, false, nil
+			return Extraction{}, false, nil
 		}
 
 		var segments = strings.Split(val, ",")
@@ -102,10 +87,10 @@ func NewSpiffe(config *SpiffeConfig) Extractor {
 					continue
 				}
 
-				return identityExtractor(part[len(prefix):]), true, nil
+				return Extraction{Value: part[len(prefix):]}, true, nil
 			}
 		}
 
-		return nil, false, nil
+		return Extraction{}, false, nil
 	}
 }

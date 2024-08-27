@@ -11,8 +11,8 @@ STORE_FILE='e2e/store.fga.yaml'
 FGA_API_URL='http://localhost:18080'
 TARGET_URL='http://localhost:8080'
 
-which yq || (echo "yq is not installed. Please install it using make e2e-tools." && exit 1)
-which fga || (echo "fga is not installed. Please install it make e2e-tools." && exit 1)
+which yq > /dev/null || (echo "yq is not installed. Please install it using make e2e-tools." && exit 1)
+which fga > /dev/null || (echo "fga is not installed. Please install it make e2e-tools." && exit 1)
 
 TMPDIR=$(mktemp -d)
 MODEL=$TMPDIR/model.fga

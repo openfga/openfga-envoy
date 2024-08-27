@@ -55,12 +55,9 @@ func (e ExtAuthZFilter) Register(server *grpc.Server) {
 func (e ExtAuthZFilter) Check(ctx context.Context, req *envoy.CheckRequest) (response *envoy.CheckResponse, err error) {
 	res, err := e.check(ctx, req)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
-	// TODO: replace with logging library
-	log.Println(res)
 	return res, nil
 }
 
@@ -83,20 +80,21 @@ func (e ExtAuthZFilter) extract(ctx context.Context, req *envoy.CheckRequest) (*
 
 // Check implements the Check method of the Authorization interface.
 func (e ExtAuthZFilter) check(ctx context.Context, req *envoy.CheckRequest) (response *envoy.CheckResponse, err error) {
-	extracted, err := e.extract(ctx, req)
+	check, err := e.extract(ctx, req)
 	if err != nil {
+		fmt.Printf("extracting from request: %v", err)
 		return nil, err
 	}
 
-	if extracted == nil {
+	if check == nil {
 		return deny(codes.InvalidArgument, "No extraction set found"), nil
 	}
 
 	body := client.ClientCheckRequest{
-		User:     extracted.User,
-		Relation: extracted.Relation,
-		Object:   extracted.Object,
-		Context:  &extracted.Context,
+		User:     check.User,
+		Relation: check.Relation,
+		Object:   check.Object,
+		Context:  &check.Context,
 	}
 
 	options := client.ClientCheckOptions{
@@ -105,6 +103,7 @@ func (e ExtAuthZFilter) check(ctx context.Context, req *envoy.CheckRequest) (res
 
 	data, err := e.client.Check(ctx).Body(body).Options(options).Execute()
 	if err != nil {
+		log.Printf("%v for %v\n", err, body)
 		return deny(codes.Internal, fmt.Sprintf("Error checking permissions: %v", err)), nil
 	}
 
@@ -112,5 +111,6 @@ func (e ExtAuthZFilter) check(ctx context.Context, req *envoy.CheckRequest) (res
 		return allow, nil
 	}
 
+	log.Printf("unauthorized request for %v\n", body)
 	return deny(codes.PermissionDenied, fmt.Sprintf("Access denied: %s", data.GetResolution())), nil
 }

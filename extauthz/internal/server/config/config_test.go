@@ -16,9 +16,9 @@ func TestConfig(t *testing.T) {
 	require.Len(t, cfg.ExtractionSet, 1)
 	require.Equal(t, "test", cfg.ExtractionSet[0].Name)
 	require.Equal(t, "mock", cfg.ExtractionSet[0].User.Type)
-	require.Equal(t, "my_user", cfg.ExtractionSet[0].User.Config.(*extractor.MockConfig).User)
+	require.Equal(t, "subject:my_user", cfg.ExtractionSet[0].User.Config.(*extractor.MockConfig).Value)
 	require.Equal(t, "mock", cfg.ExtractionSet[0].Object.Type)
-	require.Equal(t, "my_object", cfg.ExtractionSet[0].Object.Config.(*extractor.MockConfig).Object)
+	require.Equal(t, "resource:my_object", cfg.ExtractionSet[0].Object.Config.(*extractor.MockConfig).Value)
 	require.Equal(t, "mock", cfg.ExtractionSet[0].Relation.Type)
-	require.Equal(t, "my_relation", cfg.ExtractionSet[0].Relation.Config.(*extractor.MockConfig).Relation)
+	require.Equal(t, "my_relation", cfg.ExtractionSet[0].Relation.Config.(*extractor.MockConfig).Value)
 }
