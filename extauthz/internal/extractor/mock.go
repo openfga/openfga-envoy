@@ -7,13 +7,16 @@ import (
 )
 
 type MockConfig struct {
-	Val     string                 `yaml:"value"`
+	Value   string                 `yaml:"value"`
 	Context map[string]interface{} `yaml:"context"`
 	Err     error                  `yaml:"error"`
 }
 
 func NewMock(cfg *MockConfig) Extractor {
 	return func(ctx context.Context, value *authv3.CheckRequest) (Extraction, bool, error) {
-		return Extraction{Value: cfg.Val, Context: cfg.Context}, cfg.Val != "", cfg.Err
+		return Extraction{
+			Value:   cfg.Value,
+			Context: cfg.Context,
+		}, cfg.Value != "", cfg.Err
 	}
 }

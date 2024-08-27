@@ -17,7 +17,7 @@ import (
 	"google.golang.org/grpc/test/bufconn"
 )
 
-func server(ctx context.Context, e extractor.ExtractorSet) (auth_pb.AuthorizationClient, func()) {
+func server(ctx context.Context, e extractor.ExtractorKit) (auth_pb.AuthorizationClient, func()) {
 	buffer := 101024 * 1024
 	lis := bufconn.Listen(buffer)
 
@@ -28,7 +28,7 @@ func server(ctx context.Context, e extractor.ExtractorSet) (auth_pb.Authorizatio
 		panic(err)
 	}
 
-	filter := authz.NewExtAuthZFilter(fgaClient, []extractor.ExtractorSet{e})
+	filter := authz.NewExtAuthZFilter(fgaClient, []extractor.ExtractorKit{e})
 
 	baseServer := grpc.NewServer()
 	auth_pb.RegisterAuthorizationServer(baseServer, filter)
@@ -63,7 +63,7 @@ func TestNoUserExtractedFails(t *testing.T) {
 
 	expectedErr := errors.New("no user")
 
-	e := extractor.ExtractorSet{
+	e := extractor.ExtractorKit{
 		Name: "extauthz",
 		User: func(ctx context.Context, value *auth_pb.CheckRequest) (extractor.Extraction, bool, error) {
 			return extractor.Extraction{}, false, expectedErr

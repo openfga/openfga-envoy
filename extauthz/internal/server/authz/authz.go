@@ -2,6 +2,7 @@ package authz
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 
@@ -36,15 +37,15 @@ var (
 // ExtAuthZFilter is an implementation of the Envoy AuthZ filter.
 type ExtAuthZFilter struct {
 	client        *client.OpenFgaClient
-	extractionSet []extractor.ExtractorSet
+	extractionKit []extractor.ExtractorKit
 	modelID       string
 }
 
 var _ envoy.AuthorizationServer = (*ExtAuthZFilter)(nil)
 
 // NewExtAuthZFilter creates a new ExtAuthZFilter
-func NewExtAuthZFilter(c *client.OpenFgaClient, es []extractor.ExtractorSet) *ExtAuthZFilter {
-	return &ExtAuthZFilter{client: c, extractionSet: es}
+func NewExtAuthZFilter(c *client.OpenFgaClient, es []extractor.ExtractorKit) *ExtAuthZFilter {
+	return &ExtAuthZFilter{client: c, extractionKit: es}
 }
 
 func (e ExtAuthZFilter) Register(server *grpc.Server) {
@@ -54,108 +55,46 @@ func (e ExtAuthZFilter) Register(server *grpc.Server) {
 func (e ExtAuthZFilter) Check(ctx context.Context, req *envoy.CheckRequest) (response *envoy.CheckResponse, err error) {
 	res, err := e.check(ctx, req)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
-	log.Println(res)
 	return res, nil
 }
 
-type extracted struct {
-	user     extractor.Extraction
-	object   extractor.Extraction
-	relation extractor.Extraction
-}
-
-func (e ExtAuthZFilter) extract(ctx context.Context, req *envoy.CheckRequest) (*extracted, error) {
-	var user, object, relation extractor.Extraction
-	for _, es := range e.extractionSet {
-		var (
-			found bool
-			err   error
-		)
-		user, found, err = es.User(ctx, req)
-		if err != nil {
-			return nil, err
+func (e ExtAuthZFilter) extract(ctx context.Context, req *envoy.CheckRequest) (*extractor.Check, error) {
+	for _, es := range e.extractionKit {
+		check, err := es.Extract(ctx, req)
+		if err == nil {
+			return check, nil
 		}
 
-		if !found {
+		if errors.Is(err, extractor.ErrValueNotFound) {
 			continue
 		}
 
-		object, found, err = es.Object(ctx, req)
-		if err != nil {
-			return nil, err
-		}
-		if !found {
-			continue
-		}
-
-		relation, found, err = es.Relation(ctx, req)
-		if err != nil {
-			return nil, err
-		}
-		if !found {
-			continue
-		}
-
-		return &extracted{
-			user:     user,
-			object:   object,
-			relation: relation,
-		}, nil
+		return nil, err
 	}
 
 	return nil, nil
 }
 
-func mergeMaps(map1, map2 map[string]any) map[string]any {
-	UniqueMap := make(map[string]any)
-
-	// for loop for the first map
-	for key, val := range map1 {
-		UniqueMap[key] = val
-	}
-
-	// for loop for the second map
-	for key, val := range map2 {
-		UniqueMap[key] = val
-	}
-	// return merged result
-	return UniqueMap
-}
-
 // Check implements the Check method of the Authorization interface.
 func (e ExtAuthZFilter) check(ctx context.Context, req *envoy.CheckRequest) (response *envoy.CheckResponse, err error) {
-	extracted, err := e.extract(ctx, req)
+	check, err := e.extract(ctx, req)
 	if err != nil {
+		fmt.Printf("extracting from request: %v", err)
 		return nil, err
 	}
 
-	if extracted == nil {
+	if check == nil {
 		return deny(codes.InvalidArgument, "No extraction set found"), nil
 	}
 
-	context := map[string]any{}
-
-	if extracted.user.Context != nil {
-		context = mergeMaps(context, extracted.user.Context)
-	}
-
-	if extracted.object.Context != nil {
-		context = mergeMaps(context, extracted.object.Context)
-	}
-
-	if extracted.relation.Context != nil {
-		context = mergeMaps(context, extracted.relation.Context)
-	}
-
 	body := client.ClientCheckRequest{
-		User:     extracted.user.Value,
-		Relation: extracted.relation.Value,
-		Object:   extracted.object.Value,
-		Context:  &context,
+		User:     check.User,
+		Relation: check.Relation,
+		Object:   check.Object,
+		Context:  &check.Context,
 	}
 
 	options := client.ClientCheckOptions{
@@ -164,6 +103,7 @@ func (e ExtAuthZFilter) check(ctx context.Context, req *envoy.CheckRequest) (res
 
 	data, err := e.client.Check(ctx).Body(body).Options(options).Execute()
 	if err != nil {
+		log.Printf("%v for %v\n", err, body)
 		return deny(codes.Internal, fmt.Sprintf("Error checking permissions: %v", err)), nil
 	}
 
@@ -171,5 +111,6 @@ func (e ExtAuthZFilter) check(ctx context.Context, req *envoy.CheckRequest) (res
 		return allow, nil
 	}
 
+	log.Printf("unauthorized request for %v\n", body)
 	return deny(codes.PermissionDenied, fmt.Sprintf("Access denied: %s", data.GetResolution())), nil
 }

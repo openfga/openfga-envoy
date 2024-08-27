@@ -10,10 +10,10 @@ test:
 .PHONY: build
 build:
 	@mkdir -p ./build
-	make build-platform BUILD_OS="linux" BUILD_ARCH="amd64"
-	make build-platform BUILD_OS="linux" BUILD_ARCH="arm64"
-	make build-platform BUILD_OS="darwin" BUILD_ARCH="amd64"
-	make build-platform BUILD_OS="darwin" BUILD_ARCH="arm64"
+	@make build-platform BUILD_OS="linux" BUILD_ARCH="amd64"
+	@make build-platform BUILD_OS="linux" BUILD_ARCH="arm64"
+	@make build-platform BUILD_OS="darwin" BUILD_ARCH="amd64"
+	@make build-platform BUILD_OS="darwin" BUILD_ARCH="arm64"
 
 build-platform:
 	@mkdir -p ./build

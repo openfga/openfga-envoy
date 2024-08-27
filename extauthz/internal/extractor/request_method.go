@@ -6,12 +6,12 @@ import (
 	authv3 "github.com/envoyproxy/go-control-plane/envoy/service/auth/v3"
 )
 
-func NewMethod(cfg any) Extractor {
+func NewRequestMethod(any) Extractor {
 	return func(ctx context.Context, value *authv3.CheckRequest) (Extraction, bool, error) {
 		return Extraction{
-			Value: "can_call",
+			Value: "access",
 			Context: map[string]interface{}{
-				"method": value.GetAttributes().GetRequest().GetHttp().GetMethod(),
+				"request_method": value.GetAttributes().GetRequest().GetHttp().GetMethod(),
 			},
 		}, true, nil
 	}
