@@ -29,7 +29,7 @@ func TestSpiffeExtractor(t *testing.T) {
 
 		require.NoError(t, err)
 		require.False(t, found)
-		require.Nil(t, extraction)
+		require.Empty(t, extraction.Value)
 	})
 
 	t.Run("success for subject", func(t *testing.T) {

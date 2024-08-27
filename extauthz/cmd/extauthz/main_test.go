@@ -66,7 +66,7 @@ func TestNoUserExtractedFails(t *testing.T) {
 	e := extractor.ExtractorKit{
 		Name: "extauthz",
 		User: func(ctx context.Context, value *auth_pb.CheckRequest) (extractor.Extraction, bool, error) {
-			return nil, false, expectedErr
+			return extractor.Extraction{}, false, expectedErr
 		},
 	}
 
