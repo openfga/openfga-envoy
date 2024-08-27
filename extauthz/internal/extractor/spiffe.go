@@ -51,7 +51,7 @@ const (
 )
 
 type SpiffeConfig struct {
-	_type spiffeExtractionType `yaml:"type"`
+	Type spiffeExtractionType `yaml:"type"`
 }
 
 func NewSpiffe(config *SpiffeConfig) Extractor {
@@ -61,7 +61,7 @@ func NewSpiffe(config *SpiffeConfig) Extractor {
 
 	var prefix string
 
-	if config._type == spiffeTypeUser {
+	if config.Type == spiffeTypeUser {
 		prefix = spiffeCurrentClientKey
 	} else {
 		prefix = spiffeKey
