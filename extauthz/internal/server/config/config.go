@@ -55,18 +55,25 @@ type ExtractionSet struct {
 type Config struct {
 	ExtractionSet []ExtractionSet `yaml:"extraction_sets"`
 	Server        Server          `yaml:"server"`
+	Log           Log
+}
+
+type Log struct {
+	Level           string `yaml:"level"`
+	Format          string `yaml:"format"`
+	TimestampFormat string `yaml:"timestamp_format"`
 }
 
 func LoadConfig(path string) (Config, error) {
 	cfg := Config{}
 	config, err := os.ReadFile(path)
 	if err != nil {
-		return cfg, err
+		return cfg, fmt.Errorf("reading file: %w", err)
 	}
 
 	err = yaml.Unmarshal(config, &cfg)
 	if err != nil {
-		return cfg, err
+		return cfg, fmt.Errorf("unmarshaling config: %w", err)
 	}
 
 	return cfg, nil

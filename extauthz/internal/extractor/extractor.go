@@ -15,7 +15,7 @@ type Check struct {
 	Context  map[string]interface{}
 }
 
-func (c Check) Validate() error {
+func (c Check) validate() error {
 	if c.User == "" {
 		return errors.New("user is required")
 	}
@@ -103,7 +103,7 @@ func (ek ExtractorKit) Extract(ctx context.Context, req *authv3.CheckRequest) (*
 		return nil, fmt.Errorf("extracting relation: %w", err)
 	}
 
-	if err := check.Validate(); err != nil {
+	if err := check.validate(); err != nil {
 		return nil, fmt.Errorf("validating check: %v", err)
 	}
 
@@ -118,6 +118,8 @@ func GetExtractorConfig(name string) (Config, error) {
 		return &MockConfig{}, nil
 	case "request_method":
 		return nil, nil
+	case "spiffe":
+		return &SpiffeConfig{}, nil
 	default:
 		return nil, errors.New("extractor not found")
 	}
@@ -129,6 +131,8 @@ func MakeExtractor(name string, cfg Config) (Extractor, error) {
 		return NewMock(cfg.(*MockConfig)), nil
 	case "request_method":
 		return NewRequestMethod(cfg), nil
+	case "spiffe":
+		return NewSpiffe(cfg.(*SpiffeConfig)), nil
 	default:
 		return nil, errors.New("extractor not found")
 	}

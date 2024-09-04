@@ -3,6 +3,10 @@ server:
   # TODO(jcchavezs): This should be read from an env var
   store_id: ${STORE_ID}
 
+log:
+  level: debug
+  format: json
+
 extraction_sets:
   - name: test
     user:

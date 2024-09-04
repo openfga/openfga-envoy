@@ -11,6 +11,8 @@ import (
 	"github.com/openfga/openfga-envoy/extauthz/internal/extractor"
 	"github.com/openfga/openfga-envoy/extauthz/internal/server/authz"
 	"github.com/openfga/openfga-envoy/extauthz/internal/server/config"
+	"github.com/openfga/openfga/pkg/logger"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
@@ -32,7 +34,6 @@ func main() {
 	}
 
 	fgaClient, err := client.NewSdkClient(&client.ClientConfiguration{
-		//		Debug:                true,
 		ApiUrl:               cfg.Server.APIURL,
 		StoreId:              cfg.Server.StoreID,
 		AuthorizationModelId: cfg.Server.AuthorizationModelID, // optional, recommended to be set for production
@@ -68,16 +69,22 @@ func main() {
 		extractionSet = append(extractionSet, eSet)
 	}
 
-	filter := authz.NewExtAuthZFilter(fgaClient, extractionSet)
+	logger, err := logger.NewLogger(parseLogConfig(cfg.Log)...)
+	if err != nil {
+		log.Fatalf("failed to create logger: %v", err)
+	}
+	defer logger.Sync()
+
+	filter := authz.NewExtAuthZFilter(fgaClient, extractionSet, logger)
 
 	server := createServer(filter)
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
-		panic(err)
+		log.Fatalf("failed start listener: %v", err)
 	}
 
-	fmt.Printf("Starting server on port %d\n", port)
+	logger.Info("Starting server", zap.Int("port", port))
 	log.Fatal(server.Serve(listener))
 }
 
@@ -88,4 +95,12 @@ func createServer(filter *authz.ExtAuthZFilter) *grpc.Server {
 	auth_pb.RegisterAuthorizationServer(grpcServer, filter)
 
 	return grpcServer
+}
+
+func parseLogConfig(cfg config.Log) []logger.OptionLogger {
+	return []logger.OptionLogger{
+		logger.WithLevel(cfg.Level),
+		logger.WithFormat(cfg.Format),
+		logger.WithTimestampFormat(cfg.TimestampFormat),
+	}
 }
