@@ -11,6 +11,7 @@ import (
 	"github.com/openfga/go-sdk/client"
 	"github.com/openfga/openfga-envoy/extauthz/internal/extractor"
 	"github.com/openfga/openfga-envoy/extauthz/internal/server/authz"
+	"github.com/openfga/openfga/pkg/logger"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -28,7 +29,7 @@ func server(ctx context.Context, e extractor.ExtractorKit) (auth_pb.Authorizatio
 		panic(err)
 	}
 
-	filter := authz.NewExtAuthZFilter(fgaClient, []extractor.ExtractorKit{e})
+	filter := authz.NewExtAuthZFilter(fgaClient, []extractor.ExtractorKit{e}, logger.NewNoopLogger())
 
 	baseServer := grpc.NewServer()
 	auth_pb.RegisterAuthorizationServer(baseServer, filter)

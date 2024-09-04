@@ -3,6 +3,11 @@ server:
   store_id: 01FQH7V8BEG3GPQW93KTRFR8JB
   authorization_model_id: 01GXSA8YR785C4FYS3C0RTG7B1
 
+log:
+  level: debug
+  format: text
+  timestamp_format: "ISO8601"
+
 extraction_sets:
   - name: test
     user:
