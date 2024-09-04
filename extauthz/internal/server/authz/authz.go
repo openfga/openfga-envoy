@@ -83,6 +83,7 @@ func (e ExtAuthZFilter) extract(ctx context.Context, req *envoy.CheckRequest) (*
 
 // Check implements the Check method of the Authorization interface.
 func (e ExtAuthZFilter) check(ctx context.Context, req *envoy.CheckRequest) (response *envoy.CheckResponse, err error) {
+	// TODO: create a new logger when the interface includes the method
 	reqID := req.Attributes.GetRequest().GetHttp().GetHeaders()["x-request-id"]
 	check, err := e.extract(ctx, req)
 	if err != nil {
