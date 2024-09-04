@@ -15,7 +15,7 @@ type Check struct {
 	Context  map[string]interface{}
 }
 
-func (c Check) Validate() error {
+func (c Check) validate() error {
 	if c.User == "" {
 		return errors.New("user is required")
 	}
@@ -103,7 +103,7 @@ func (ek ExtractorKit) Extract(ctx context.Context, req *authv3.CheckRequest) (*
 		return nil, fmt.Errorf("extracting relation: %w", err)
 	}
 
-	if err := check.Validate(); err != nil {
+	if err := check.validate(); err != nil {
 		return nil, fmt.Errorf("validating check: %v", err)
 	}
 
