@@ -15,29 +15,29 @@ const (
 	spiffeCurrentClientKey = "URI="
 )
 
-type spiffeExtractionType int8
+type SpiffeExtractionType int8
 
-func (t spiffeExtractionType) String() string {
+func (t SpiffeExtractionType) String() string {
 	switch t {
-	case spiffeTypeUser:
+	case SpiffeTypeUser:
 		return "user"
-	case spiffeTypeObject:
+	case SpiffeTypeObject:
 		return "object"
 	}
 
 	return "unknown"
 }
 
-func (t spiffeExtractionType) MarshalYAML() (interface{}, error) {
+func (t SpiffeExtractionType) MarshalYAML() (interface{}, error) {
 	return t.String(), nil
 }
 
-func (t *spiffeExtractionType) UnmarshalYAML(value *yaml.Node) error {
+func (t *SpiffeExtractionType) UnmarshalYAML(value *yaml.Node) error {
 	switch value.Value {
 	case "user":
-		*t = spiffeTypeUser
+		*t = SpiffeTypeUser
 	case "object":
-		*t = spiffeTypeObject
+		*t = SpiffeTypeObject
 	default:
 		return errors.New("unknown spiffe extraction type")
 	}
@@ -46,12 +46,12 @@ func (t *spiffeExtractionType) UnmarshalYAML(value *yaml.Node) error {
 }
 
 const (
-	spiffeTypeUser spiffeExtractionType = iota
-	spiffeTypeObject
+	SpiffeTypeUser SpiffeExtractionType = iota
+	SpiffeTypeObject
 )
 
 type SpiffeConfig struct {
-	Type spiffeExtractionType `yaml:"type"`
+	Type SpiffeExtractionType `yaml:"type"`
 }
 
 func NewSpiffe(config *SpiffeConfig) Extractor {
@@ -61,7 +61,7 @@ func NewSpiffe(config *SpiffeConfig) Extractor {
 
 	var prefix string
 
-	if config.Type == spiffeTypeUser {
+	if config.Type == SpiffeTypeUser {
 		prefix = spiffeCurrentClientKey
 	} else {
 		prefix = spiffeKey

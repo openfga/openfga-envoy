@@ -1,0 +1,15 @@
+FROM --platform=$BUILDPLATFORM golang:1.22 as builder
+
+RUN go install github.com/a8m/envsubst/cmd/envsubst@latest
+RUN go install github.com/itchyny/gojq/cmd/gojq@latest
+RUN go install github.com/openfga/cli/cmd/fga@latest
+
+ARG BUILDPLATFORM
+
+FROM --platform=$BUILDPLATFORM busybox
+
+COPY --from=builder /go/bin/fga /fga
+COPY --from=builder /go/bin/gojq /usr/local/bin/jq
+COPY --from=builder /go/bin/envsubst /usr/local/bin/envsubst
+
+ENTRYPOINT ["/fga"]

@@ -31,6 +31,18 @@ spec:
       labels:
         app: openfga-extauthz
     spec:
+      initContainers:
+        - name: load-model
+          image: ghcr.io/openfga/openfga-extauthz-fga-busybox:0.0.1
+          command:
+            - "/etc/extauthz-template/build-config.sh"
+            - "/etc/extauthz/config.yaml"
+          volumeMounts:
+            - name: config-templates
+              mountPath: "/etc/extauthz-template"
+              readOnly: true
+            - name: config
+              mountPath: "/etc/extauthz"
       containers:
         - image: ghcr.io/openfga/openfga-extauthz:0.0.1
           command:
@@ -47,9 +59,12 @@ spec:
               mountPath: "/etc/extauthz"
               readOnly: true
       volumes:
-        - name: config
+        - name: config-templates
           configMap:
             # Provide the name of the ConfigMap you want to mount.
             name: exthauthz-config
+            defaultMode: 0777
+        - name: config
+          emptyDir: {}
 ---
 

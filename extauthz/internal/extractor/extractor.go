@@ -118,6 +118,8 @@ func GetExtractorConfig(name string) (Config, error) {
 		return &MockConfig{}, nil
 	case "request_method":
 		return nil, nil
+	case "spiffe":
+		return &SpiffeConfig{}, nil
 	default:
 		return nil, errors.New("extractor not found")
 	}
@@ -129,6 +131,8 @@ func MakeExtractor(name string, cfg Config) (Extractor, error) {
 		return NewMock(cfg.(*MockConfig)), nil
 	case "request_method":
 		return NewRequestMethod(cfg), nil
+	case "spiffe":
+		return NewSpiffe(cfg.(*SpiffeConfig)), nil
 	default:
 		return nil, errors.New("extractor not found")
 	}

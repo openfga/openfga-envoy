@@ -12,7 +12,7 @@ import (
 func TestSpiffeUnmarshal(t *testing.T) {
 	c := &SpiffeConfig{}
 	yaml.Unmarshal([]byte("type: user"), c)
-	require.Equal(t, spiffeTypeUser, c.Type)
+	require.Equal(t, SpiffeTypeUser, c.Type)
 }
 
 func TestSpiffeExtractor(t *testing.T) {
@@ -34,7 +34,7 @@ func TestSpiffeExtractor(t *testing.T) {
 
 	t.Run("success for subject", func(t *testing.T) {
 		extractor := NewSpiffe(&SpiffeConfig{
-			Type: spiffeTypeUser,
+			Type: SpiffeTypeUser,
 		})
 
 		extraction, found, err := extractor(context.Background(), &authv3.CheckRequest{
@@ -56,7 +56,7 @@ func TestSpiffeExtractor(t *testing.T) {
 
 	t.Run("success for object", func(t *testing.T) {
 		extractor := NewSpiffe(&SpiffeConfig{
-			Type: spiffeTypeObject,
+			Type: SpiffeTypeObject,
 		})
 
 		extraction, found, err := extractor(context.Background(), &authv3.CheckRequest{

@@ -32,7 +32,7 @@ func main() {
 	}
 
 	fgaClient, err := client.NewSdkClient(&client.ClientConfiguration{
-		//		Debug:                true,
+		Debug:                true,
 		ApiUrl:               cfg.Server.APIURL,
 		StoreId:              cfg.Server.StoreID,
 		AuthorizationModelId: cfg.Server.AuthorizationModelID, // optional, recommended to be set for production
@@ -66,6 +66,10 @@ func main() {
 		}
 
 		extractionSet = append(extractionSet, eSet)
+	}
+
+	if len(extractionSet) == 0 {
+		log.Fatalf("no extraction set found")
 	}
 
 	filter := authz.NewExtAuthZFilter(fgaClient, extractionSet)

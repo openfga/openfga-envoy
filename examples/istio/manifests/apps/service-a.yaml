@@ -19,6 +19,11 @@ spec:
         - name: httpmole
           image: ghcr.io/jcchavezs/httpmole:0.0.1
           imagePullPolicy: IfNotPresent
+          command:
+            - "/httpmole"
+            - "-p"
+            - "10080"
+            - "-show-response"
           ports:
             - name: web
               containerPort: 10080

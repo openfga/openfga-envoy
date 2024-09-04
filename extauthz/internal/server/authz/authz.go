@@ -90,6 +90,7 @@ func (e ExtAuthZFilter) check(ctx context.Context, req *envoy.CheckRequest) (res
 		return deny(codes.InvalidArgument, "No extraction set found"), nil
 	}
 
+	log.Printf("checking access from %s to %s under %s\n", check.User, check.Object, check.Relation)
 	body := client.ClientCheckRequest{
 		User:     check.User,
 		Relation: check.Relation,
