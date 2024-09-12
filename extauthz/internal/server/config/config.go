@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -52,10 +53,47 @@ type ExtractionSet struct {
 	Relation Extractor `yaml:"relation"`
 }
 
+type AuthMode int8
+
+const (
+	AuthModeMonitor AuthMode = iota + 1
+	AuthModeEnforce
+	AuthModeDisabled
+)
+
+func (m AuthMode) String() string {
+	switch m {
+	case AuthModeMonitor:
+		return "MONITOR"
+	case AuthModeEnforce:
+		return "ENFORCE"
+	case AuthModeDisabled:
+		return "DISABLED"
+	}
+
+	return "UNKNOWN"
+}
+
+func (m *AuthMode) UnmarshalYAML(value *yaml.Node) error {
+	switch value.Value {
+	case "ENFORCE":
+		*m = AuthModeEnforce
+	case "DISABLED":
+		*m = AuthModeDisabled
+	case "MONITOR":
+		*m = AuthModeMonitor
+	default:
+		return errors.New("unknown mode")
+	}
+
+	return nil
+}
+
 type Config struct {
 	ExtractionSet []ExtractionSet `yaml:"extraction_sets"`
 	Server        Server          `yaml:"server"`
-	Log           Log
+	Log           Log             `yaml:"log"`
+	Mode          AuthMode        `yaml:"mode"`
 }
 
 type Log struct {
