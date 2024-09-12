@@ -37,41 +37,64 @@ var (
 
 // ExtAuthZFilter is an implementation of the Envoy AuthZ filter.
 type ExtAuthZFilter struct {
-	client        *client.OpenFgaClient
-	extractionKit []extractor.ExtractorKit
-	modelID       string
-	logger        logger.Logger
+	enforce        bool
+	client         *client.OpenFgaClient
+	extractionKits []extractor.ExtractorKit
+	modelID        string
+	logger         logger.Logger
 }
 
 var _ envoy.AuthorizationServer = (*ExtAuthZFilter)(nil)
 
+type Config struct {
+	Enforce        bool
+	ExtractionKits []extractor.ExtractorKit
+}
+
 // NewExtAuthZFilter creates a new ExtAuthZFilter
-func NewExtAuthZFilter(c *client.OpenFgaClient, es []extractor.ExtractorKit, logger logger.Logger) *ExtAuthZFilter {
-	return &ExtAuthZFilter{client: c, extractionKit: es, logger: logger}
+func NewExtAuthZFilter(config Config, c *client.OpenFgaClient, logger logger.Logger) *ExtAuthZFilter {
+	return &ExtAuthZFilter{enforce: config.Enforce, client: c, extractionKits: config.ExtractionKits, logger: logger}
 }
 
 func (e ExtAuthZFilter) Register(server *grpc.Server) {
 	envoy.RegisterAuthorizationServer(server, e)
 }
 
+// Check the access decision based on the incoming request
 func (e ExtAuthZFilter) Check(ctx context.Context, req *envoy.CheckRequest) (response *envoy.CheckResponse, err error) {
-	res, err := e.check(ctx, req)
-	if err != nil {
-		e.logger.Error("failed to check permissions", zap.Error(err))
-		return nil, err
+	reqID := req.Attributes.GetRequest().GetHttp().GetHeaders()["x-request-id"]
+	logger := e.logger
+	if reqID != "" {
+		logger = e.logger.With(zap.String("request_id", reqID))
 	}
 
-	return res, nil
+	res, err := e.check(ctx, req, logger)
+	if e.enforce {
+		if err != nil {
+			logger.Error("Failed to check permissions", zap.Error(err))
+			return nil, err
+		}
+
+		return res, nil
+	} else {
+		if err != nil {
+			logger.Error("Failed to check permissions", zap.Error(err))
+		}
+
+		return allow, nil
+	}
 }
 
 func (e ExtAuthZFilter) extract(ctx context.Context, req *envoy.CheckRequest) (*extractor.Check, error) {
-	for _, es := range e.extractionKit {
+	for _, es := range e.extractionKits {
+		e.logger.Debug("Extracting values", zap.String("extractor", es.Name))
 		check, err := es.Extract(ctx, req)
 		if err == nil {
 			return check, nil
 		}
 
 		if errors.Is(err, extractor.ErrValueNotFound) {
+			e.logger.Debug("Extracing value not found", zap.String("extraction_kit", es.Name), zap.Error(err))
 			continue
 		}
 
@@ -82,16 +105,14 @@ func (e ExtAuthZFilter) extract(ctx context.Context, req *envoy.CheckRequest) (*
 }
 
 // Check implements the Check method of the Authorization interface.
-func (e ExtAuthZFilter) check(ctx context.Context, req *envoy.CheckRequest) (response *envoy.CheckResponse, err error) {
-	// TODO: create a new logger when the interface includes the method
-	reqID := req.Attributes.GetRequest().GetHttp().GetHeaders()["x-request-id"]
+func (e ExtAuthZFilter) check(ctx context.Context, req *envoy.CheckRequest, logger logger.Logger) (response *envoy.CheckResponse, err error) {
 	check, err := e.extract(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("extracting values from request: %w", err)
 	}
 
 	if check == nil {
-		e.logger.Error("failed to extract values from request", zap.String("request_id", reqID))
+		logger.Error("Failed to extract values from request")
 		return deny(codes.InvalidArgument, "No extraction set found"), nil
 	}
 
@@ -109,15 +130,15 @@ func (e ExtAuthZFilter) check(ctx context.Context, req *envoy.CheckRequest) (res
 	e.logger.Debug("Checking permissions", zap.String("user", check.User), zap.String("relation", check.Relation), zap.String("object", check.Object))
 	data, err := e.client.Check(ctx).Body(body).Options(options).Execute()
 	if err != nil {
-		e.logger.Error("Failed to check permissions", zap.Error(err), zap.String("request_id", reqID))
+		logger.Error("Failed to check permissions", zap.Error(err))
 		return deny(codes.Internal, fmt.Sprintf("Error checking permissions: %v", err)), nil
 	}
 
 	if data.GetAllowed() {
-		e.logger.Debug("Access granted", zap.String("resolution", data.GetResolution()), zap.String("request_id", reqID))
+		logger.Debug("Access granted", zap.String("resolution", data.GetResolution()))
 		return allow, nil
 	}
 
-	e.logger.Debug("Access denied", zap.String("request_id", reqID))
+	logger.Debug("Access denied")
 	return deny(codes.PermissionDenied, fmt.Sprintf("Access denied: %s", data.GetResolution())), nil
 }

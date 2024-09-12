@@ -29,7 +29,10 @@ func server(ctx context.Context, e extractor.ExtractorKit) (auth_pb.Authorizatio
 		panic(err)
 	}
 
-	filter := authz.NewExtAuthZFilter(fgaClient, []extractor.ExtractorKit{e}, logger.NewNoopLogger())
+	filter := authz.NewExtAuthZFilter(authz.Config{
+		Enforce:        true,
+		ExtractionKits: []extractor.ExtractorKit{e},
+	}, fgaClient, logger.NewNoopLogger())
 
 	baseServer := grpc.NewServer()
 	auth_pb.RegisterAuthorizationServer(baseServer, filter)

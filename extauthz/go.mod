@@ -3,13 +3,13 @@ module github.com/openfga/openfga-envoy/extauthz
 go 1.22.6
 
 require (
-	github.com/envoyproxy/go-control-plane v0.12.1-0.20240419124334-0cebb2f428b3
+	github.com/envoyproxy/go-control-plane v0.12.1-0.20240621013728-1eb8caab5155
 	github.com/openfga/go-sdk v0.3.5
-	github.com/openfga/openfga v1.6.0
+	github.com/openfga/openfga v1.6.1-0.20240906222438-b8787d5f9d21
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/zap v1.27.0
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240822170219-fc7c04adadcd
-	google.golang.org/grpc v1.65.0
+	google.golang.org/grpc v1.66.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
