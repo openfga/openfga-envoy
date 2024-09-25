@@ -1,0 +1,18 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: ext-authz
+  # Applying the policy in the istio-system namespace we enforce
+  # it globally on all namespaces.
+  namespace: istio-system
+spec:
+  action: CUSTOM
+  provider:
+    # Name defined in the extensionProviders property in the  MeshConfig
+    # (the `istio` ConfigMap in the istio-system namespace)
+    name: openfga-extauthz-grpc
+    # A single empty rule will force all requests to be forwarded to the external
+    # authorization server, as long as the workload is captured by the selectors
+    # configured above.
+    rules:
+      - {}

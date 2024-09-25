@@ -13,14 +13,12 @@ mode: ENFORCE
 extraction_sets:
   - name: test
     user:
-      type: mock
+      type: spiffe
       config:
-        value: subject:my_user
+        type: user
     object:
       type: mock
       config:
         value: resource:my_object
     relation:
-      type: mock
-      config:
-        value: my_relation
+      type: request_method

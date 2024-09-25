@@ -1,7 +1,8 @@
-PACKAGE_VERSION ?= dev
 BUILD_OS ?= $(shell go env GOOS)
 BUILD_ARCH ?= $(shell go env GOARCH)
+DOCKER_IMAGE = ghcr.io/openfga/openfga-extauthz
 DOCKER_PLATFORM = $(BUILD_OS)/$(BUILD_ARCH)
+PACKAGE_VERSION ?= dev
 
 .PHONY: test
 test:
@@ -21,7 +22,7 @@ build-platform:
 
 .PHONY: docker
 docker: build
-	@docker build --platform=$(DOCKER_PLATFORM) -t gcr.io/openfga/openfga-extauthz:$(PACKAGE_VERSION) -f Dockerfile .
+	@docker build --platform=$(DOCKER_PLATFORM) -t $(DOCKER_IMAGE):$(PACKAGE_VERSION) -f Dockerfile .
 	@echo "\nImage available by doing:\n\ndocker pull --platform=$(DOCKER_PLATFORM) gcr.io/openfga/openfga-extauthz:$(PACKAGE_VERSION)\n"
 
 .PHONY: e2e

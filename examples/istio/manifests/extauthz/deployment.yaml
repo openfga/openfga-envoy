@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: extauthz
+  namespace: openfga
+  labels:
+    app: openfga-extauthz
+spec:
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+    - name: grpc
+      port: 9000
+      targetPort: 9000
+  selector:
+    app: openfga-extauthz
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: extauthz
+  namespace: openfga
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openfga-extauthz
+  template:
+    metadata:
+      labels:
+        app: openfga-extauthz
+    spec:
+      initContainers:
+        - name: load-model
+          image: ghcr.io/openfga/openfga-extauthz-fga-busybox:0.0.1
+          command:
+            - "/etc/extauthz-template/build-config.sh"
+            - "/etc/extauthz/config.yaml"
+          volumeMounts:
+            - name: config-templates
+              mountPath: "/etc/extauthz-template"
+              readOnly: true
+            - name: config
+              mountPath: "/etc/extauthz"
+      containers:
+        - image: ghcr.io/openfga/openfga-extauthz:0.0.1
+          command:
+            - "/envoy-extauthz"
+            - "--config"
+            - "/etc/extauthz/config.yaml"
+          imagePullPolicy: IfNotPresent
+          name: extauthz
+          ports:
+            - containerPort: 8000
+            - containerPort: 9000
+          volumeMounts:
+            - name: config
+              mountPath: "/etc/extauthz"
+              readOnly: true
+      volumes:
+        - name: config-templates
+          configMap:
+            # Provide the name of the ConfigMap you want to mount.
+            name: exthauthz-config
+            defaultMode: 0777
+        - name: config
+          emptyDir: {}
+---
+

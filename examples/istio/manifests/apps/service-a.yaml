@@ -1,0 +1,42 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: app-a
+  namespace: apps
+  labels:
+    app: app-a
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-a
+  template:
+    metadata:
+      labels:
+        app: app-a
+    spec:
+      containers:
+        - name: httpmole
+          image: ghcr.io/jcchavezs/httpmole:0.0.1
+          imagePullPolicy: IfNotPresent
+          command:
+            - "/httpmole"
+            - "-p"
+            - "10080"
+            - "-show-response"
+          ports:
+            - name: web
+              containerPort: 10080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-a
+  namespace: apps
+spec:
+  ports:
+    - name: web
+      port: 80
+      targetPort: web
+  selector:
+    app: app-a

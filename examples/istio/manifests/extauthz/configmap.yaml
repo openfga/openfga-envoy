@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: exthauthz-config
+  namespace: openfga
+data:
+  build-config.sh: |
+    #!/bin/sh
+    set -e
+
+    SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
+    /fga store create --model $SCRIPTPATH/model.fga --api-url http://openfga.openfga.svc.cluster.local:8080 > store.json
+
+    export STORE_ID=$(jq -r '.store.id' store.json)
+    echo "Using store ID: ${STORE_ID}"
+    envsubst < $SCRIPTPATH/config.yaml.tmpl > $1
+
+  config.yaml.tmpl: |
+    server:
+      api_url: http://extauthz.openfga.svc.cluster.local:8080
+      store_id: ${STORE_ID}
+
+    extraction_sets:
+    - name: test
+      user:
+        type: spiffe
+        config:
+          type: user
+      object:
+        type: spiffe
+        config:
+          type: object
+      relation:
+        type: request_method
+
+  model.fga: |
+    model
+      schema 1.1
+
+    type identity
+      relations
+        define access: [ identity with allowed_methods ]
+
+    condition allowed_methods(allowed: list<string>, request_method: string) {
+      allowed.exists_one(r, r == request_method) || allowed.exists_one(r, r == "*")
+    }
