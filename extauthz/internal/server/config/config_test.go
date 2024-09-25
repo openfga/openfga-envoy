@@ -18,6 +18,8 @@ func TestConfig(t *testing.T) {
 	require.Equal(t, "text", cfg.Log.Format)
 	require.Equal(t, "ISO8601", cfg.Log.TimestampFormat)
 
+	require.Equal(t, AuthModeEnforce, cfg.Mode)
+
 	require.Len(t, cfg.ExtractionSet, 1)
 	require.Equal(t, "test", cfg.ExtractionSet[0].Name)
 	require.Equal(t, "spiffe", cfg.ExtractionSet[0].User.Type)

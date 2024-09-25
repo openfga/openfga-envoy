@@ -8,6 +8,8 @@ log:
   format: text
   timestamp_format: "ISO8601"
 
+mode: ENFORCE
+
 extraction_sets:
   - name: test
     user:

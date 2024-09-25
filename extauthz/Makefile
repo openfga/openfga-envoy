@@ -23,6 +23,7 @@ build-platform:
 .PHONY: docker
 docker: build
 	@docker build --platform=$(DOCKER_PLATFORM) -t $(DOCKER_IMAGE):$(PACKAGE_VERSION) -f Dockerfile .
+	@echo "\nImage available by doing:\n\ndocker pull --platform=$(DOCKER_PLATFORM) gcr.io/openfga/openfga-extauthz:$(PACKAGE_VERSION)\n"
 
 .PHONY: e2e
 e2e: e2e-tools
