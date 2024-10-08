@@ -50,8 +50,8 @@ func main() {
 			logger.Fatal("failed to initialize OpenFGA client", zap.Error(err))
 		}
 
-		extractionSet := make([]extractor.ExtractorKit, 0, len(cfg.ExtractionSet))
-		for _, es := range cfg.ExtractionSet {
+		extractionSet := make([]extractor.ExtractorKit, 0, len(cfg.ExtractionSets))
+		for _, es := range cfg.ExtractionSets {
 			var (
 				eSet extractor.ExtractorKit
 				err  error

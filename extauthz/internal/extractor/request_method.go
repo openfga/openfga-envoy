@@ -10,7 +10,7 @@ func NewRequestMethod(any) Extractor {
 	return func(ctx context.Context, value *authv3.CheckRequest) (Extraction, bool, error) {
 		return Extraction{
 			Value: "access",
-			Context: map[string]interface{}{
+			Context: map[string]any{
 				"request_method": value.GetAttributes().GetRequest().GetHttp().GetMethod(),
 			},
 		}, true, nil

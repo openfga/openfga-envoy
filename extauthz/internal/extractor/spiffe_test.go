@@ -5,13 +5,13 @@ import (
 	"testing"
 
 	authv3 "github.com/envoyproxy/go-control-plane/envoy/service/auth/v3"
+	"github.com/mitchellh/mapstructure"
 	"github.com/stretchr/testify/require"
-	"gopkg.in/yaml.v3"
 )
 
 func TestSpiffeUnmarshal(t *testing.T) {
 	c := &SpiffeConfig{}
-	yaml.Unmarshal([]byte("type: user"), c)
+	mapstructure.Decode(map[string]any{"type": "user"}, c)
 	require.Equal(t, spiffeTypeUser, c.Type)
 }
 
