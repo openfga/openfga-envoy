@@ -12,7 +12,7 @@ type Check struct {
 	User     string
 	Relation string
 	Object   string
-	Context  map[string]interface{}
+	Context  map[string]any
 }
 
 func (c Check) validate() error {
@@ -33,10 +33,10 @@ func (c Check) validate() error {
 
 type Extraction struct {
 	Value   string
-	Context map[string]interface{}
+	Context map[string]any
 }
 
-func (e *Extraction) applyExtraction(v *string, context map[string]interface{}) error {
+func (e *Extraction) applyExtraction(v *string, context map[string]any) error {
 	*v = e.Value
 	for k, v := range e.Context {
 		if _, ok := context[k]; ok {
@@ -61,7 +61,7 @@ var ErrValueNotFound = errors.New("extraction value not found")
 
 func (ek ExtractorKit) Extract(ctx context.Context, req *authv3.CheckRequest) (*Check, error) {
 	check := &Check{
-		Context: make(map[string]interface{}),
+		Context: make(map[string]any),
 	}
 
 	eUser, found, err := ek.User(ctx, req)
@@ -110,12 +110,14 @@ func (ek ExtractorKit) Extract(ctx context.Context, req *authv3.CheckRequest) (*
 	return check, nil
 }
 
-type Config interface{}
+type Config any
 
 func GetExtractorConfig(name string) (Config, error) {
 	switch name {
 	case "mock":
 		return &MockConfig{}, nil
+	case "header":
+		return &HeaderConfig{}, nil
 	case "request_method":
 		return nil, nil
 	case "spiffe":
@@ -129,6 +131,8 @@ func MakeExtractor(name string, cfg Config) (Extractor, error) {
 	switch name {
 	case "mock":
 		return NewMock(cfg.(*MockConfig)), nil
+	case "header":
+		return NewHeader(cfg.(*HeaderConfig)), nil
 	case "request_method":
 		return NewRequestMethod(cfg), nil
 	case "spiffe":

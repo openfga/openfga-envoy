@@ -7,9 +7,9 @@ import (
 )
 
 type MockConfig struct {
-	Value   string                 `yaml:"value"`
-	Context map[string]interface{} `yaml:"context"`
-	Err     error                  `yaml:"error"`
+	Value   string         `mapstructure:"value"`
+	Context map[string]any `mapstructure:"context"`
+	Err     error          `mapstructure:"error"`
 }
 
 func NewMock(cfg *MockConfig) Extractor {

@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	authv3 "github.com/envoyproxy/go-control-plane/envoy/service/auth/v3"
-	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -28,12 +27,8 @@ func (t spiffeExtractionType) String() string {
 	return "unknown"
 }
 
-func (t spiffeExtractionType) MarshalYAML() (interface{}, error) {
-	return t.String(), nil
-}
-
-func (t *spiffeExtractionType) UnmarshalYAML(value *yaml.Node) error {
-	switch value.Value {
+func (t *spiffeExtractionType) UnmarshalMap(value any) error {
+	switch value.(string) {
 	case "user":
 		*t = spiffeTypeUser
 	case "object":
@@ -51,7 +46,7 @@ const (
 )
 
 type SpiffeConfig struct {
-	Type spiffeExtractionType `yaml:"type"`
+	Type spiffeExtractionType `mapstructure:"type"`
 }
 
 func NewSpiffe(config *SpiffeConfig) Extractor {
