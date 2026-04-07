@@ -1,6 +1,8 @@
 module github.com/openfga/openfga-envoy/extauthz
 
-go 1.22.6
+go 1.25.0
+
+toolchain go1.26.1
 
 require (
 	github.com/envoyproxy/go-control-plane v0.12.1-0.20240621013728-1eb8caab5155
@@ -11,7 +13,7 @@ require (
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/zap v1.27.0
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240822170219-fc7c04adadcd
-	google.golang.org/grpc v1.66.0
+	google.golang.org/grpc v1.79.3
 )
 
 replace github.com/imdario/mergo => github.com/imdario/mergo v0.3.5
